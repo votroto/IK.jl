@@ -1,4 +1,3 @@
-using LinearAlgebra
 using Gurobi
 using JuMP
 
@@ -6,23 +5,27 @@ function _default_optimizer()
     optimizer_with_attributes(Gurobi.Optimizer, "Nonconvex" => 2)
 end
 
-"""
+#=
 d offset
 r radius
 α twist
 M desired pose
 θ initial angle
 w angle weights
-"""
+=#
+
 function solve_inverse_kinematics(d, r, α, M, θ, w; optimizer=_default_optimizer())
     T(i) = dh_lin_t(c[i], s[i], d[i], α[i], r[i])
-    iT(i) = dh_inv_t(c[i], s[i], d[i], α[i], r[i])
+    iT(i) = dh_lin_inv_t(c[i], s[i], d[i], α[i], r[i])
 
     m = Model(optimizer)
 
     @variable m -1 <= c[1:7] <= 1
     @variable m -1 <= s[1:7] <= 1
     @variable m x[1:4, 1:4, 1:3]
+
+    set_start_value.(c, cos.(θ))
+    set_start_value.(s, sin.(θ))
 
     @constraint m x[4, 1:3, :] .== 0
     @constraint m x[4, 4, :] .== 1

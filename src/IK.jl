@@ -1,5 +1,9 @@
 module IK
 
-greet() = print("Hello World!")
+export solve_forward_kinematics
+export solve_inverse_kinematics
 
-end # module
+include("forward_kinematics.jl")
+include("inverse_kinematics.jl")
+
+end

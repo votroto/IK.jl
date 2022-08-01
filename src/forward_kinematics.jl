@@ -1,8 +1,5 @@
-include("david_hartenberg.jl")
+include("denavit_hartenberg.jl")
 
 function solve_forward_kinematics(x, d, r, α)
-    ids = eachindex(x)
-    T(i) = dh_t(x[i], d[i], α[i], r[i])
-
-    prod(T[i] for i in ids)
+    prod(dh_t.(x, d, α, r))
 end
