@@ -29,10 +29,10 @@ function solve_inverse_kinematics(d, r, α, M, θ, w; optimizer=_default_optimiz
     set_start_value.(c, cos.(θ))
     set_start_value.(s, sin.(θ))
 
-    @constraint m T(3) * T(4) .== x[:, :, 1]
-    @constraint m x[:, :, 1] * T(5) .== iT(2) * x[:, :, 2]    
-    @constraint m iT(1) * x[:, :, 3] .== x[:, :, 2]
-    @constraint m M * iT(7) * iT(6) .== x[:, :, 3]
+    @constraint m T(1) * T(2) .== x[:, :, 1]
+    @constraint m x[:, :, 1] * T(3) .== x[:,:,2]
+    @constraint m x[:, :, 2] * T(4) .== x[:, :, 3] * iT(5)
+    @constraint m x[:, :, 3] .== M * iT(7) * iT(6)
 
     @constraint m c .^ 2 + s .^ 2 .== 1
     @constraint m (c .+ 1) .* tan.(θl ./ 2) .- s .<= 0
@@ -50,5 +50,5 @@ function solve_inverse_kinematics(d, r, α, M, θ, w; optimizer=_default_optimiz
         missing
     end
 
-    sol, status
+    sol, status, solve_time(m)
 end
