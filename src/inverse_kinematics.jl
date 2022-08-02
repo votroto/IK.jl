@@ -1,6 +1,8 @@
 using Gurobi
 using JuMP
 
+include("denavit_hartenberg.jl")
+
 function _default_optimizer()
     optimizer_with_attributes(Gurobi.Optimizer, "Nonconvex" => 2)
 end
@@ -27,12 +29,10 @@ function solve_inverse_kinematics(d, r, α, M, θ, w; optimizer=_default_optimiz
     set_start_value.(c, cos.(θ))
     set_start_value.(s, sin.(θ))
 
-    @constraint m x[4, 1:3, :] .== 0
-    @constraint m x[4, 4, :] .== 1
     @constraint m T(3) * T(4) .== x[:, :, 1]
-    @constraint m x[:, :, 1] * T(5) .== x[:, :, 2]
-    @constraint m x[:, :, 2] * T(6) .== x[:, :, 3]
-    @constraint m x[:, :, 3] * T(7) .== iT(2) * iT(1) * M
+    @constraint m x[:, :, 1] * T(5) .== iT(2) * x[:, :, 2]    
+    @constraint m iT(1) * x[:, :, 3] .== x[:, :, 2]
+    @constraint m M * iT(7) * iT(6) .== x[:, :, 3]
 
     @constraint m c .^ 2 + s .^ 2 .== 1
     @constraint m (c .+ 1) .* tan.(θl ./ 2) .- s .<= 0
@@ -47,7 +47,7 @@ function solve_inverse_kinematics(d, r, α, M, θ, w; optimizer=_default_optimiz
     sol = if status == MOI.OPTIMAL
         atan.(value.(s), value.(c))
     else
-        undefined
+        missing
     end
 
     sol, status
