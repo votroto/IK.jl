@@ -1,3 +1,4 @@
+using Base.Iterators: peel, drop, take
 using Gurobi
 using JuMP
 
@@ -16,23 +17,44 @@ M desired pose
 w angle weights
 =#
 
+function _split_at(xs, n)
+    take(xs, n), drop(xs, n)
+end
+
+function _split_manipulator(ids)
+    f, s = _split_at(ids, div(length(ids), 2, RoundUp))
+    f, reverse(collect(s))
+end
+
+function add_dh_chain!(m, T, ids)
+    h, t = peel(T.(ids))
+
+    X = [@variable(m, [1:4, 1:4]) for i in drop(ids, 2)]
+    es = prod.(zip([h, X...], t))
+
+    for (e,x) in zip(es, X)
+        @constraint m e .== x
+    end
+
+    last(es)
+end
+
 function solve_inverse_kinematics(d, r, α, M, θ, w; optimizer=_default_optimizer())
     T(i) = dh_lin_t(c[i], s[i], d[i], α[i], r[i])
     iT(i) = dh_lin_inv_t(c[i], s[i], d[i], α[i], r[i])
 
+    ids = eachindex(d)
+    fwd, rev = _split_manipulator(ids)
+
     m = Model(optimizer)
 
-    @variable m -1 <= c[1:7] <= 1
-    @variable m -1 <= s[1:7] <= 1
-    @variable m x[1:4, 1:4, 1:3]
+    @variable(m, -1 <= c[i in ids] <= 1)
+    @variable(m, -1 <= s[i in ids] <= 1)
 
-    set_start_value.(c, cos.(θ))
-    set_start_value.(s, sin.(θ))
+    F = add_dh_chain!(m, T, fwd)
+    R = add_dh_chain!(m, iT, rev)
 
-    @constraint m T(1) * T(2) .== x[:, :, 1]
-    @constraint m x[:, :, 1] * T(3) .== x[:,:,2]
-    @constraint m x[:, :, 2] * T(4) .== x[:, :, 3] * iT(5)
-    @constraint m x[:, :, 3] .== M * iT(7) * iT(6)
+    @constraint m F .== M * R
 
     @constraint m c .^ 2 + s .^ 2 .== 1
     @constraint m (c .+ 1) .* tan.(θl ./ 2) .- s .<= 0
@@ -42,13 +64,9 @@ function solve_inverse_kinematics(d, r, α, M, θ, w; optimizer=_default_optimiz
 
     optimize!(m)
 
-    status = termination_status(m)
+    stat = termination_status(m)
+    sol = has_values(m) ? atan.(value.(s), value.(c)) : missing
+    obj = stat == OPTIMAL ? objective_value(m) : missing
 
-    sol = if status == MOI.OPTIMAL
-        atan.(value.(s), value.(c))
-    else
-        missing
-    end
-
-    sol, status, solve_time(m)
+    sol, obj, stat, solve_time(m)
 end
