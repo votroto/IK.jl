@@ -1,4 +1,4 @@
-include("eight_parameters.jl")
+include("icub_arm_parameters.jl")
 include("../src/forward_kinematics.jl")
 include("../src/inverse_kinematics.jl")
 

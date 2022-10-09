@@ -1,12 +1,18 @@
 using Base.Iterators: peel, drop, take
 using DynamicPolynomials
 using Gurobi
+using SCIP
 using JuMP
 
 include("denavit_hartenberg.jl")
 
 function _default_optimizer()
-        optimizer_with_attributes(Gurobi.Optimizer, "Nonconvex" => 2)
+        optimizer_with_attributes(Gurobi.Optimizer, "Nonconvex" => 2, "Presolve"=>2)
+end
+
+
+function _scip_optimizer()
+        optimizer_with_attributes(SCIP.Optimizer)
 end
 
 function _split_manipulator(ids)
@@ -28,12 +34,13 @@ function build_eqs(d, r, α, M)
 end
 
 
-function lift_mono!(m, var_map, powers)
+function lift_mono!(m, var_map, powers, mmm)
         temp = 1
         for (v, p) in powers
                 for j in 1:p
-                        nvar = @variable(m)
-                        @constraint m temp * var_map[v] == nvar
+                        eee = temp * var_map[v]
+                        nvar = get!(mmm, eee, @variable(m))
+                        @constraint m eee == nvar
                         temp = nvar
                 end
         end
@@ -42,9 +49,11 @@ end
 
 
 function lift_poly!(m, var_map, poly)
+        poly = mapcoefficients(c->round(c, digits=12), poly)
+        mmm = Dict()
         es = powers.(monomials(poly))
         cs = coefficients(poly)
-        ns = map(e -> lift_mono!(m, var_map, e), es)
+        ns = map(e -> lift_mono!(m, var_map, e,mmm), es)
 
         sum(cs .* ns, init=0)
 end
@@ -95,7 +104,6 @@ function solve_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
 
         @objective m Min sum(2 .* w .* (1 .- c .* cos.(θ) .- s .* sin.(θ)))
 
-        print(m)
         optimize!(m)
 
         stat = termination_status(m)
