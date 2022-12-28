@@ -1,8 +1,9 @@
-params = "replication_parameters"
+params = "kuka_parameters"
 
 include("$(params).jl")
 include("../src/forward_kinematics.jl")
 include("../src/inverse_kinematics.jl")
+include("../src/inverse_kinematics_matrix.jl")
 include("../src/local_kinematics.jl")
 
 function bench(f)
@@ -28,11 +29,9 @@ end
 #bench(devnull)
 rand_pose = random_feasible_pose(d, r, α, θh, θl)
 
-angmin, angmax = matrix_kinematic_bounds(d, r, α, θl, θh, rand_pose)
 #
-sol, obj, = matrix_inverse_kinematics(d, r, α, angmin, angmax, rand_pose, θ, w)
-sol, obj, = matrix_inverse_kinematics(d, r, α, θl, θh, rand_pose, θ, w)
-##sol1, obj1, = solve_inverse_kinematics(d, r, α, θl, θh, rand_pose, θ, w; )
+sol, obj, = solve_inverse_kinematics_matrix(d, r, α, θl, θh, rand_pose, θ, w)
+#sol1, obj1, = solve_inverse_kinematics(d, r, α, θl, θh, rand_pose, θ, w; )
 #=
 open("$params.test.txt", "a") do f
         for i in 1:1

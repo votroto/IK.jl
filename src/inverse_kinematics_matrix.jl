@@ -5,23 +5,22 @@ using SCIP
 using JuMP
 using MultivariatePolynomials
 
+include("utils.jl")
 include("jump_extensions.jl")
 include("denavit_hartenberg.jl")
 
 function _matrix_default_optimizer()
-        optimizer_with_attributes(Gurobi.Optimizer, "Nonconvex" => 2, "Presolve" => 2)#"BranchDir" => 1, "Heuristics" => 0, "Cuts" => 0)
+        optimizer_with_attributes(Gurobi.Optimizer, "Nonconvex" => 2)
+end
+
+function _matrix_option_optimizer()
+        optimizer_with_attributes(Gurobi.Optimizer, "Nonconvex" => 2,"Method"=>2,"CutPasses"=>3)
 end
 
 function _split_manipulator(ids)
         mid = div(length(ids), 2)
         f, s = take(ids, mid), drop(ids, mid)
         f, reverse(collect(s))
-end
-
-function _reduce(f, xs)
-        mid = div(length(xs), 2)
-        h, t = take(xs, mid), drop(xs, mid)
-        f(reduce(f, h), reduce(f, t))
 end
 
 function build_mat_eqs(d, r, α, c, s)
@@ -41,7 +40,7 @@ function build_mat_eqs(d, r, α, c, s)
 end
 
 
-function matrix_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
+function solve_inverse_kinematics_matrix(d, r, α, θl, θh, M, θ, w;
         optimizer=_matrix_default_optimizer(), init=θ)
 
         m = Model(optimizer)
@@ -57,7 +56,7 @@ function matrix_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
         set_start_value.(s, sin.(init))
 
         LHS, RHS = build_mat_eqs(d, r, α, c, s)
-        @constraint m LHS .== M * RHS
+        @constraint m LHS - M * RHS .== 0
 
         @constraint m c .^ 2 .+ s .^ 2 .== 1
         @constraint m (c .+ 1) .* tan.(θl / 2) .- s .<= 0
