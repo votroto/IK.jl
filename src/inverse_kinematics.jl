@@ -13,12 +13,9 @@ function _default_optimizer()
         optimizer_with_attributes(Gurobi.Optimizer, "Nonconvex" => 2, "Presolve" => 2)
 end
 
-
 function _scip_optimizer()
         optimizer_with_attributes(SCIP.Optimizer)
 end
-
-
 
 function build_eqs(d, r, α, M)
         T(i) = dh_lin_t(c[i], s[i], d[i], α[i], r[i])
