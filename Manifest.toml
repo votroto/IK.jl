@@ -2,7 +2,7 @@
 
 julia_version = "1.8.3"
 manifest_format = "2.0"
-project_hash = "aa2c2413edbf0beaacd62fc692173260a0979cfd"
+project_hash = "f7eb6a4a84f07f6ecb16c4fd585338ed356c6a33"
 
 [[deps.ADNLPModels]]
 deps = ["ForwardDiff", "LinearAlgebra", "NLPModels", "Requires", "ReverseDiff", "SparseArrays"]
@@ -1212,6 +1212,12 @@ deps = ["Test"]
 git-tree-sha1 = "8d0d7a3fe2f30d6a7f833a5f19f7c7a5b396eae6"
 uuid = "a2a6695c-b41b-5b7d-aed9-dbfdeacea5d7"
 version = "0.3.0"
+
+[[deps.TypedPolynomials]]
+deps = ["LinearAlgebra", "MacroTools", "MultivariatePolynomials", "MutableArithmetics", "Pkg", "Random"]
+git-tree-sha1 = "01128c8ea76aa728b167e5af455445e6648ad423"
+uuid = "afbbf031-7a57-5f58-a1b9-b774a0fad08d"
+version = "0.3.2"
 
 [[deps.UUIDs]]
 deps = ["Random", "SHA"]

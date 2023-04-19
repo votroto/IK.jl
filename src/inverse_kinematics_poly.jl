@@ -8,9 +8,10 @@ using MultivariatePolynomials
 include("utils.jl")
 include("jump_extensions.jl")
 include("denavit_hartenberg.jl")
+include("local_kinematics.jl")
 
-function _default_optimizer()
-        optimizer_with_attributes(Gurobi.Optimizer, "Nonconvex" => 2, "Presolve" => 2)
+function _default_optimizer_poly()
+        optimizer_with_attributes(Gurobi.Optimizer, "Nonconvex" => 2, "Threads"=>4) #, "FeasibilityTol"=>1e-3)
 end
 
 function _scip_optimizer()
@@ -30,14 +31,15 @@ function build_eqs(d, r, α, M)
 end
 
 function solve_inverse_kinematics_poly(d, r, α, θl, θh, M, θ, w;
-        optimizer=_default_optimizer(), init=θ)
-
+        optimizer=_default_optimizer_poly(), init=θ)
+        #   m = direct_model(Gurobi.Optimizer())
         m = Model(optimizer)
 
         slim = sin_min_max.(θl, θh)
         clim = cos_min_max.(θl, θh)
 
         ids = eachindex(d)
+
         @variable(m, clim[i][1] <= c[i in ids] <= clim[i][2])
         @variable(m, slim[i][1] <= s[i in ids] <= slim[i][2])
 
@@ -46,10 +48,9 @@ function solve_inverse_kinematics_poly(d, r, α, θl, θh, M, θ, w;
 
         E, pc, ps = build_eqs(d, r, α, M)
         E = mapcoefficients.(c -> (abs(c) > (1e-12)) ? c : 0.0, E)
-        E = map(e -> e([pc; ps] => [c; s]), E)
+        E = map(e -> e([pc; ps] => [c; s]), E[1:3, :])
 
         @constraint m E .== 0
-
         @constraint m c .^ 2 .+ s .^ 2 .== 1
         @constraint m (c .+ 1) .* tan.(θl / 2) .- s .<= 0
         @constraint m (c .+ 1) .* tan.(θh / 2) .- s .>= 0

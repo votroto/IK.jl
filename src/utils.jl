@@ -1,4 +1,4 @@
-
+using Base.Iterators:take,drop
 
 function _split_manipulator(ids)
         mid = div(length(ids), 2)

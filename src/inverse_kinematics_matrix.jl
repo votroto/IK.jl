@@ -10,7 +10,7 @@ include("jump_extensions.jl")
 include("denavit_hartenberg.jl")
 
 function _matrix_default_optimizer()
-        optimizer_with_attributes(Gurobi.Optimizer, "Nonconvex" => 2)
+        optimizer_with_attributes(Gurobi.Optimizer, "Nonconvex" => 2, "Threads"=>4)
 end
 
 function _matrix_option_optimizer()
@@ -70,10 +70,6 @@ function solve_inverse_kinematics_matrix(d, r, α, θl, θh, M, θ, w;
 
         sol = has_values(m) ? atan.(value.(s), value.(c)) : missing
         obj = stat == OPTIMAL ? objective_value(m) : missing
-
-        println(θl)
-        println(sol)
-        println(θh)
 
         sol, obj, stat, solve_time(m)
 end

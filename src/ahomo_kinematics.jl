@@ -25,8 +25,6 @@ function homo_inverse_kinematics(d, r, α, θl, θh, M, θ, w)
 
         C = [c .^ 2 .+ s .^ 2 .- 1]
         E = build_eqs(c, s, d, r, α, M)
-	return E
-	println([E[1:3,1:4][:]; C...])
 	sys = System([E[1:4,1:3][:]; C...])
 	solve(sys)
 

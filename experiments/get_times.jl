@@ -1,4 +1,4 @@
-params = "kuka_parameters"
+params = "replication_parameters"
 
 include("$(params).jl")
 include("../src/forward_kinematics.jl")
@@ -7,50 +7,32 @@ include("../src/inverse_kinematics_matrix.jl")
 include("../src/inverse_kinematics_poly.jl")
 include("../src/local_kinematics.jl")
 
-function bench(f)
+r, d, α, θl, θh = random_manipulator(5)
+w = normalize(ones(5), 1)
+θ = zeros(5)
+M = random_feasible_pose(d, r, α, θl, θh)
+rand_pose = random_feasible_pose(d, r, α, θl, θh)
+init, lobj, = local_inverse_kinematics(d, r, α, θl, θh, rand_pose, θ, w)
+sol, obj, stat, tim = solve_inverse_kinematics(d, r, α, θl, θh, rand_pose, θ, w; init)
 
-        rand_pose = random_feasible_pose(d, r, α, θh, θl)
+p1 = solve_forward_kinematics(sol[1:3], d[1:3], r[1:3], α[1:3])
+p2 = solve_forward_kinematics(sol[4:5], d[4:5], r[4:5], α[4:5])
 
-        ii, iiobj,infeas = local_inverse_kinematics(d, r, α, θl, θh, rand_pose, θ, w)
-	if infeas >= 1e-4
-println(infeas)
-		return
-	end
-        sol, obj, stat, tim = matrix_inverse_kinematics(d, r, α, θl, θh, rand_pose, θ, w; init=ii)
-	sol, obj, stat, tim = matrix_inverse_kinematics(d, r, α, θl, θh, rand_pose, θ, w; )
-        act_pose = solve_forward_kinematics(sol, d, r, α)
-        er = sum(abs.(rand_pose .- act_pose)) / 16
-        println("$tim\t$er")
-        println(f, "$tim\t$er")
-end
-
-
-#lmin,lmax = find_bounds(d[1:2], r[1:2], α[1:2], θl[1:2], θh[1:2])
-
-#bench(devnull)
-rand_pose = random_feasible_pose(d, r, α, θh, θl)
-
-#
-sol, obj, = solve_inverse_kinematics_poly(d, r, α, θl, θh, rand_pose, θ, w)
-sol, obj, = solve_inverse_kinematics(d, r, α, θl, θh, rand_pose, θ, w)
-#sol1, obj1, = solve_inverse_kinematics(d, r, α, θl, θh, rand_pose, θ, w; )
+p2 = rand_pose / p1
 #=
-open("$params.test.txt", "a") do f
-        for i in 1:1
-                bench(f)
-        end
-end
-=#
-#=
-open("$params.2.infeas.txt","a") do f
-    for i in 1:100
-	pis = ones(length(d)) * π
-        rand_pose = random_feasible_pose(d, r, α, -pis, pis)
-        sol, obj, stat, tim = solve_inverse_kinematics(d, r, α, θl, θh, rand_pose, θ, w)
+@show r, d, α, θl, θh, w, θ = get_icub_v2(7)
+open("$params.v2.R7.$(rand(UInt32)).infeas.txt","a") do f
+#open("$params.$(rand(UInt32)).infeas.txt","a") do f
+    for i in 1:300
+        rand_pose = random_feasible_pose(d, r, α,  θl, θh)
+	init,lobj, = local_inverse_kinematics(d, r, α, θl, θh, rand_pose, θ, w)
+        sol, obj, stat, tim = solve_inverse_kinematics(d, r, α, θl, θh, rand_pose, θ, w; init)
 	act_pose = solve_forward_kinematics(sol, d, r, α)
-	er = sum(abs.(rand_pose .- act_pose))/16
-        println("$tim\t$er")
-        println(f, "$tim\t$er")
+	println("$tim\t$obj")
+	println(f, "$tim\t$obj")
+	#@show pe, re = pose_error(rand_pose, act_pose)
+        #println("$tim\t$pe\t$re\t$obj\t$lobj")
+	#println(f, "$tim\t$pe\t$re\t$obj\t$lobj")
     end
 end
 =#
