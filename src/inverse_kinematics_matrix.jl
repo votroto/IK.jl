@@ -9,18 +9,8 @@ include("utils.jl")
 include("jump_extensions.jl")
 include("denavit_hartenberg.jl")
 
-function _matrix_default_optimizer()
-        optimizer_with_attributes(Gurobi.Optimizer, "Nonconvex" => 2, "Threads"=>4)
-end
-
-function _matrix_option_optimizer()
-        optimizer_with_attributes(Gurobi.Optimizer, "Nonconvex" => 2,"Method"=>2,"CutPasses"=>3)
-end
-
-function _split_manipulator(ids)
-        mid = div(length(ids), 2)
-        f, s = take(ids, mid), drop(ids, mid)
-        f, reverse(collect(s))
+function _default_optimizer_matrix()
+        optimizer_with_attributes(Gurobi.Optimizer, "Nonconvex" => 2, "Threads" => 4)
 end
 
 function build_mat_eqs(d, r, α, c, s)
@@ -39,39 +29,28 @@ function build_mat_eqs(d, r, α, c, s)
         LHS, RHS
 end
 
-
 function solve_inverse_kinematics_matrix(d, r, α, θl, θh, M, θ, w;
-        optimizer=_matrix_default_optimizer(), init=θ)
+        optimizer=_default_optimizer_matrix(), init=θ)
 
         m = Model(optimizer)
 
-        slim = sin_min_max.(θl, θh)
-        clim = cos_min_max.(θl, θh)
-
         ids = eachindex(d)
-        @variable(m, clim[i][1] <= c[i in ids] <= clim[i][2])
-        @variable(m, slim[i][1] <= s[i in ids] <= slim[i][2])
-
-        set_start_value.(c, cos.(init))
-        set_start_value.(s, sin.(init))
+        @variable(m, c[ids])
+        @variable(m, s[ids])
+        constrain_trig_var.(c, s, θl, θh, init)
 
         LHS, RHS = build_mat_eqs(d, r, α, c, s)
-        @constraint m LHS - M * RHS .== 0
-
+        
+        @constraint m LHS .== M * RHS
         @constraint m c .^ 2 .+ s .^ 2 .== 1
         @constraint m (c .+ 1) .* tan.(θl / 2) .- s .<= 0
         @constraint m (c .+ 1) .* tan.(θh / 2) .- s .>= 0
 
-        @objective m Min sum(2 .* w .* (1 .- c .* cos.(θ) .- s .* sin.(θ)))
+        @objective m Min sum(w .* lin_angdiff_approx.(c, s, θ))
 
         optimize!(m)
 
-        stat = termination_status(m)
-
-        sol = has_values(m) ? atan.(value.(s), value.(c)) : missing
-        obj = stat == OPTIMAL ? objective_value(m) : missing
-
-        sol, obj, stat, solve_time(m)
+        extract_solution(c, s, m)
 end
 
 

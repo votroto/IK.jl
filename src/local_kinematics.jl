@@ -6,10 +6,8 @@ using NLPModelsIpopt
 include("denavit_hartenberg.jl")
 
 function build_obj(x)
-
         return sum(2 .* w .* (1 .- cos.(x) .* cos.(θ) .- sin.(x) .* sin.(θ)))
 end
-
 
 function build_constr(x, d, r, α, M, th)
         T(i) = dh_t(x[i], d[i], α[i], r[i])
@@ -19,7 +17,6 @@ function build_constr(x, d, r, α, M, th)
 
         return [x; norm(pp - M)]
 end
-
 
 function infeasibility(x, d, r, α, M)
         T(i) = dh_t(x[i], d[i], α[i], r[i])
