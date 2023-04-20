@@ -3,6 +3,13 @@ using JuMP
 import Base.:*
 Base.:*(a::GenericQuadExpr, b::GenericQuadExpr) = jump_quadratic_product(a, b)
 
+function _start_value(x)
+        v = start_value(x)
+        isnothing(v) ? NaN : v
+end
+
+jump_quadratic_start(a, b) = _start_value(a) * _start_value(b)
+
 function jump_quadratic_bounds(a, b)
         la = has_lower_bound(a) ? lower_bound(a) : -Inf
         ua = has_upper_bound(a) ? upper_bound(a) : Inf
@@ -13,67 +20,20 @@ function jump_quadratic_bounds(a, b)
         lo, hi
 end
 
-function jump_quadratic_start(a, b)
-        sa = start_value(a)
-        sb = start_value(b)
-
-        if isnothing(sa) || isnothing(sa)
-                nothing
-        else
-                sa * sb
-        end
-end
-
-function jump_quadratic_lift(a, b)
+function jump_quadmono_lift(a, b)
         model = a.model
-        lb, ub = jump_quadratic_bounds(a, b)
+        lower_bound, upper_bound = jump_quadratic_bounds(a, b)
         start = jump_quadratic_start(a, b)
-        name = string(a) * string(b)
+        base_name = string(a) * string(b)
 
-        v = @variable(model, lower_bound = lb, upper_bound = ub, start = start, base_name = name)
+        v = @variable(model, lower_bound, upper_bound, start, base_name)
         @constraint(model, v == a * b)
 
         v
 end
 
-function jump_quadratic_envelope(x, y)
-        model = x.model
-
- 	lx = has_lower_bound(x) ? lower_bound(x) : -1
-        ux = has_upper_bound(x) ? upper_bound(x) : 1
-        ly = has_lower_bound(y) ? lower_bound(y) : -1
-        uy = has_upper_bound(y) ? upper_bound(y) : 1
-	l, h = jump_quadratic_bounds(x, y)
-
-        z = @variable(model, lower_bound = l, upper_bound = h)
-
-        @constraint(model, -z + lx*y + ly*x <= lx*ly)
-	@constraint(model, -z + ux*y + uy*x <= ux*uy)
-	@constraint(model, -z + ux*y + ly*x >= ux*ly)
-	@constraint(model, -z + lx*y + uy*x >= lx*uy)
-
-        z
-end
-
-function jump_quadratic_envelope(a::QuadExpr)
-        a.aff + sum(c * jump_quadratic_envelope(x.a, x.b) for (x, c) in a.terms; init=0)
-end
-
-
-
-function jump_quadratic_product(a::QuadExpr, b::AffExpr)
-        na = a.aff + sum(c * jump_quadratic_lift(x.a, x.b) for (x, c) in a.terms; init=0)
-        na * b
-end
-
-function jump_quadratic_product(a::QuadExpr, b::AffExpr)
-        na = a.aff + sum(c * jump_quadratic_lift(x.a, x.b) for (x, c) in a.terms; init=0)
-        na * b
-end
-
-function jump_quadratic_product(a::VariableRef, b::QuadExpr)
-        na = b.aff + sum(c * jump_quadratic_lift(x.a, x.b) for (x, c) in b.terms; init=0)
-        na * a
+function jump_quadexpr_lift(a::QuadExpr; init=0)
+        a.aff + sum(c * jump_quadmono_lift(x.a, x.b) for (x, c) in a.terms; init)
 end
 
 function jump_quadratic_product(a::QuadExpr, b::QuadExpr)
@@ -83,14 +43,16 @@ function jump_quadratic_product(a::QuadExpr, b::QuadExpr)
                 return a.aff * b.aff
         end
 
-        na = a.aff + sum(c * jump_quadratic_lift(x.a, x.b) for (x, c) in a.terms; init=0)
-        nb = b.aff + sum(c * jump_quadratic_lift(x.a, x.b) for (x, c) in b.terms; init=0)
-        na * nb
+        jump_quadexpr_lift(a) * jump_quadexpr_lift(b)
 end
 
 function jump_quadratic_product(a::AbstractMatrix, b::AbstractMatrix)
-        [mapreduce(jump_quadratic_product, +, a[i, :], b[:, j]) for i in 1:4, j in 1:4]
+        is, js = axes(a)
+        [mapreduce(jump_quadratic_product, +, a[i, :], b[:, j]) for i in is, j in js]
 end
+
+jump_quadratic_product(a::QuadExpr, b::AffExpr) = jump_quadexpr_lift(a) * b
+jump_quadratic_product(a::VariableRef, b::QuadExpr) = a * jump_quadexpr_lift(b)
 
 jump_quadratic_product(a::AffExpr, b::QuadExpr) = jump_quadratic_product(b, a)
 jump_quadratic_product(a::QuadExpr, b::VariableRef) = jump_quadratic_product(b, a)

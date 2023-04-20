@@ -2,7 +2,7 @@ using LinearAlgebra
 
 #from https://github.com/robotology/icub-main/blob/master/src/libraries/iKin/src/iKinFwd.cpp
 
-function get_icub_v3(n)
+function params_icub_v3(n)
 	r = [0.0725 0.0 -0.0304112 0.0 0.0 -0.01065 0.0146593 -0.0020075 0.0 0.0625]
 	d = [0.0 0.0 -0.161133 -0.163978 0.0 -0.2005 0.00308819 -0.1628 0.0 0.016]
 	α = [-π / 2, π / 2, 75.489181 * π / 180, π / 2, -π / 2, -π / 2, π / 2, π / 2, π / 2, 0]
@@ -16,7 +16,7 @@ function get_icub_v3(n)
 end
 
 
-function get_icub_v2(n)
+function params_icub_v2(n)
 	r = [0.032 0.0 -0.0233647 0.0 0.0 -0.015 0.015 0.0 0.0 0.0625]
 	d = [0.0 -0.0055 -0.1433 -0.10774 0.0 -0.15228 0.0 -0.1413 0.0 0.02598]
 	α = [π / 2, π / 2, π / 2, π / 2, -π / 2, -π / 2, π / 2, π / 2, π / 2, 0]

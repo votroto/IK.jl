@@ -9,10 +9,6 @@ include("utils.jl")
 include("jump_extensions.jl")
 include("denavit_hartenberg.jl")
 
-function _default_optimizer_matrix()
-        optimizer_with_attributes(Gurobi.Optimizer, "Nonconvex" => 2, "Threads" => 4)
-end
-
 function build_mat_eqs(d, r, α, c, s)
         T(i) = dh_lin_t(c[i], s[i], d[i], α[i], r[i])
         iT(i) = dh_lin_inv_t(c[i], s[i], d[i], α[i], r[i])
@@ -30,7 +26,7 @@ function build_mat_eqs(d, r, α, c, s)
 end
 
 function solve_inverse_kinematics_matrix(d, r, α, θl, θh, M, θ, w;
-        optimizer=_default_optimizer_matrix(), init=θ)
+        optimizer=_default_optimizer(), init=θ)
 
         m = Model(optimizer)
 

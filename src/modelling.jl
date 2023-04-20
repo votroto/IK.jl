@@ -23,15 +23,6 @@ function _split_manipulator(ids)
     f, reverse(collect(s))
 end
 
-function extract_solution(c, s, m)
-    stat = termination_status(m)
-
-    sol = has_values(m) ? atan.(value.(s), value.(c)) : missing
-    obj = stat == OPTIMAL ? objective_value(m) : missing
-
-    sol, obj, stat, solve_time(m)
-end
-
 function build_eqs(d, r, α, M)
     T(i) = dh_lin_t(c[i], s[i], d[i], α[i], r[i])
     iT(i) = dh_lin_inv_t(c[i], s[i], d[i], α[i], r[i])
@@ -42,4 +33,22 @@ function build_eqs(d, r, α, M)
     @polyvar c[ids] s[ids]
 
     prod(T, fwd) .- M * prod(iT, rev), c, s
+end
+
+function _default_optimizer()
+    attrs = ["Nonconvex" => 2, "Presolve" => 2, "Threads" => 4]
+    optimizer_with_attributes(Gurobi.Optimizer, attrs...)
+end
+
+function _scip_optimizer()
+    SCIP.Optimizer
+end
+
+function extract_solution(c, s, m)
+    stat = termination_status(m)
+
+    sol = has_values(m) ? atan.(value.(s), value.(c)) : missing
+    obj = stat == OPTIMAL ? objective_value(m) : missing
+
+    sol, obj, stat, solve_time(m)
 end

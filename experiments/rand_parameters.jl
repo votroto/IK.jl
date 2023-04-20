@@ -18,17 +18,17 @@ function random_manipulator(joint_count; twist_rng, max_angle)
     r, d, α, θl, θh, w, θ
 end
 
-function random_4rad(joint_count)
+function params_random_6rad(joint_count)
 	twist_rng(n) = continuous_uniform(n; low=-3, 3)
 	random_manipulator(joint_count; twist_rng, 3)
 end
 
-function random_4rad(joint_count)
-	twist_rng(n) = continuous_uniform(n; low=-3, 3)
+function params_random_4rad(joint_count)
+	twist_rng(n) = continuous_uniform(n; low=-3, 3) # check
 	random_manipulator(joint_count; twist_rng, 2)
 end
 
-function random_orth(joint_count)
+function params_random_orth(joint_count)
 	twist_rng(n) = rand([-π / 2, π / 2], n)
 	random_manipulator(joint_count; twist_rng, 3)
 end

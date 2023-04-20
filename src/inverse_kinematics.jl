@@ -10,14 +10,6 @@ include("jump_extensions.jl")
 include("denavit_hartenberg.jl")
 include("ik_modelling.jl")
 
-function _default_optimizer()
-        optimizer_with_attributes(Gurobi.Optimizer, "Nonconvex" => 2, "Presolve" => 2, "Threads" => 4)
-end
-
-function _scip_optimizer()
-        optimizer_with_attributes(SCIP.Optimizer)
-end
-
 function map_monomials(f, poly)
         sum(coefficients(poly) .* map(f, monomials(poly)), init=0)
 end
@@ -90,7 +82,7 @@ function solve_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
         constrain_trig_var.(c, s, θl, θh, init)
 
         E, pc, ps = build_eqs(d, r, α, M)
-        E = mapcoefficients.(c -> (abs(c) > (1e-12)) ? c : 0.0, E)
+        E = mapcoefficients.(round_zero, E)
 
         var_map = Dict([pc; ps] .=> [c; s])
         lvars = lifting_vars!(m, E, var_map)

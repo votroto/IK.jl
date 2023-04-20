@@ -1,8 +1,5 @@
 using Base.Iterators: take, drop
 
-# Thanks @ivirshup!
-unzip(a) = map(x->getfield.(a, x), fieldnames(eltype(a)))
-
 round_zero(x; atol=1e-12) = abs(x) <= atol ? 0 : x
 
 function _reduce(f, xs; init=one(eltype(xs)))

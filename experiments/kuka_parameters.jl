@@ -1,7 +1,7 @@
 using LinearAlgebra
 
 
-function get_icub_v3()
+function params_kuka_iiwa()
     r = [0; 0; 0; 0; 0; 0; 0]
     d = [340; 0; 400; 0; 400; 0; 126]
     α = [-π / 2, π / 2, -π / 2, π / 2, -π / 2, π / 2, 0]

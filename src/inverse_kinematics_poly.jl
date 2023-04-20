@@ -10,12 +10,8 @@ include("jump_extensions.jl")
 include("denavit_hartenberg.jl")
 include("local_kinematics.jl")
 
-function _default_optimizer_poly()
-        optimizer_with_attributes(Gurobi.Optimizer, "Nonconvex" => 2, "Threads"=>4)
-end
-
 function solve_inverse_kinematics_poly(d, r, α, θl, θh, M, θ, w;
-        optimizer=_default_optimizer_poly(), init=θ)
+        optimizer=_default_optimizer(), init=θ)
         m = Model(optimizer)
 
         ids = eachindex(d)

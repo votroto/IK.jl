@@ -10,14 +10,6 @@ include("jump_extensions.jl")
 include("denavit_hartenberg.jl")
 include("ik_modelling.jl")
 
-function _default_optimizer()
-        optimizer_with_attributes(Gurobi.Optimizer, "Nonconvex" => 2, "Presolve" => 2, "Threads" => 4)
-end
-
-function _scip_optimizer()
-        optimizer_with_attributes(SCIP.Optimizer)
-end
-
 function xlift_poly(vv, poly)
         function inner(mo)
                 vv[mo]
@@ -71,7 +63,7 @@ function xlifting_vars!(m, eqs, var_map)
         W, fms, vv
 end
 
-function solve_inverse_kinematics_loc(d, r, α, θl, θh, M, θ, w;
+function solve_inverse_kinematics_localizing(d, r, α, θl, θh, M, θ, w;
         optimizer=_default_optimizer(), init=θ)
 
         m = Model(optimizer)
