@@ -11,6 +11,10 @@ include("denavit_hartenberg.jl")
 include("modelling.jl")
 
 function xlift_poly(vv, poly)
+        function map_monomials(f, poly)
+                sum(coefficients(poly) .* map(f, monomials(poly)), init=0)
+        end
+        
         function inner(mo)
                 vv[mo]
         end
@@ -63,6 +67,22 @@ function xlifting_vars!(m, eqs, var_map)
         W, fms, vv
 end
 
+function chain_constraint_localizing(d, r, α, M, c, s, model)
+        ids = eachindex(d)
+        @polyvar pc[ids] ps[ids]
+        
+        fwd, rev = build_eqs(d, r, α, pc, ps)
+
+        chain_poly_dirty = prod(fwd) .- M * prod(rev)
+        chain_poly_clean = mapcoefficients.(round_zero, chain_poly_dirty)
+
+        var_map = Dict([pc; ps] .=> [c; s])
+        lvars = xlifting_vars!(model, chain_poly_clean, var_map)
+        chain_jump = xlift_poly.(Ref(lvars), chain_poly_clean)
+
+        chain_jump
+end
+
 function solve_inverse_kinematics_localizing(d, r, α, θl, θh, M, θ, w;
         optimizer=_default_optimizer(), init=θ)
 
@@ -71,16 +91,11 @@ function solve_inverse_kinematics_localizing(d, r, α, θl, θh, M, θ, w;
         ids = eachindex(d)
         @variable(m, c[ids])
         @variable(m, s[ids])
-        constrain_trig_var.(c, s, θl, θh, init)
+        constrain_trig_vars.(c, s, θl, θh, init)
 
-        E, pc, ps = build_eqs(d, r, α, M)
-        E = mapcoefficients.(round_zero, E)
+        E = chain_constraint_localizing(d, r, α, M, c, s, m)
 
-        var_map = Dict([pc; ps] .=> [c; s])
-        lvars = xlifting_vars!(m, E, var_map)
-        lE = xlift_poly.(Ref(lvars), E)
-
-        @constraint m lE .== 0
+        @constraint m E .== 0
         @constraint m c .^ 2 .+ s .^ 2 .== 1
         @constraint m (c .+ 1) .* tan.(θl / 2) .- s .<= 0
         @constraint m (c .+ 1) .* tan.(θh / 2) .- s .>= 0

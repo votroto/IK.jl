@@ -1,20 +1,14 @@
 include("../src/forward_kinematics.jl")
 
-mean(xs) = sum(xs) / length(xs)
-no_warm_start(d, r, α, θl, θh, desired, θ, w) = θ
+no_warm_start(d, r, α, θl, θh, desired, θ, w) = θ, 0.0
 
-function pose_error_sample(method, d, r, α, θl, θh, w, θ; warm_start)
+function stats_sample(method, d, r, α, θl, θh, w, θ; warm_start)
     desired = random_feasible_pose(d, r, α, θl, θh)
-    local_x = warm_start(d, r, α, θl, θh, desired, θ, w)
+    local_x, local_obj = warm_start(d, r, α, θl, θh, desired, θ, w)
     
-    x = method(d, r, α, θl, θh, desired, θ, w; init=local_x)
-    M_actual = solve_forward_kinematics(x, d, r, α)
-    
-    pose_error(desired, M_actual)
+    x, obj, ret, tim = method(d, r, α, θl, θh, desired, θ, w; init=local_x)
+    actual = solve_forward_kinematics(x, d, r, α)
+    loc_err, rot_err = pose_error(desired, actual)
+
+    loc_err, rot_err, obj, local_obj, tim, ret
 end
-
-#function average_pose_error(method, params, samples; warm_start=no_warm_start)
-#    ss = [pose_error_sample(method, params; warm_start) for i in 1:samples]
-#    mean(ss)
-#end
-

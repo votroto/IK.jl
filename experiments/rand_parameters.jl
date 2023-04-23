@@ -15,20 +15,20 @@ function random_manipulator(joint_count; twist_rng, max_angle)
 	w = normalize(ones(joint_count), 1)
 	θ = zeros(joint_count)
 
-    r, d, α, θl, θh, w, θ
+    d, r, α, θl, θh, w, θ
 end
 
 function params_random_6rad(joint_count)
-	twist_rng(n) = continuous_uniform(n; low=-3, 3)
-	random_manipulator(joint_count; twist_rng, 3)
+	twist_rng(n) = continuous_uniform(n; low=-3, high=3)
+	random_manipulator(joint_count; twist_rng, max_angle=3)
 end
 
 function params_random_4rad(joint_count)
-	twist_rng(n) = continuous_uniform(n; low=-3, 3) # check
-	random_manipulator(joint_count; twist_rng, 2)
+	twist_rng(n) = continuous_uniform(n; low=-3, high=3) # check
+	random_manipulator(joint_count; twist_rng, max_angle=2)
 end
 
 function params_random_orth(joint_count)
 	twist_rng(n) = rand([-π / 2, π / 2], n)
-	random_manipulator(joint_count; twist_rng, 3)
+	random_manipulator(joint_count; twist_rng, max_angle=3)
 end

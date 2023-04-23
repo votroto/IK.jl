@@ -16,14 +16,14 @@ function build_constr(x, d, r, α, M)
         ids = eachindex(d)
         pp = prod(T, ids)
 
-        return [x; norm(pp - M)]
+        return norm(pp - M)
 end
 
 function local_inverse_kinematics(d, r, α, θl, θh, M, θ, w; ang=θ)
         obj(x) = build_obj(x, w, θ)
 	con(x) = build_constr(x, d, r, α, M)
 
-        nlp = ADNLPModel(obj, ang, con, [θl; 0], [θh;0])
+        nlp = ADNLPModel(obj, ang, identity, θl, θh)
         stats = ipopt(nlp; tol=1e-3, print_level=0, max_iter=200)
 
         stats.solution, stats.objective

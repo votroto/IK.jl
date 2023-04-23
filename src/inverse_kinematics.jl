@@ -18,15 +18,6 @@ function lift_poly(lift_vars, poly)
         map_monomials(e -> lift_vars[e], poly)
 end
 
-#=
-d offset
-r radius
-α twist
-M desired pose
-θ initial angle
-w angle weights
-=#
-
 function lift_monon!(m, var_map, mon)
         function inner(a::Number, b)
                 b
@@ -71,6 +62,22 @@ function lifting_vars!(m, eqs, var_map)
         nnn
 end
 
+function chain_constraint_standard(d, r, α, M, c, s, m)
+        ids = eachindex(d)
+        @polyvar pc[ids] ps[ids]
+        
+        fwd, rev = build_eqs(d, r, α, pc, ps)
+
+        chain_poly_dirty = prod(fwd) .- M * prod(rev)
+        chain_poly_clean = mapcoefficients.(round_zero, chain_poly_dirty)
+
+        var_map = Dict([pc; ps] .=> [c; s])
+        lvars = lifting_vars!(m, chain_poly_clean, var_map)
+        chain_jump = lift_poly.(Ref(lvars), chain_poly_clean)
+        
+        chain_jump
+end
+
 function solve_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
         optimizer=_default_optimizer(), init=θ)
 
@@ -79,16 +86,11 @@ function solve_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
         ids = eachindex(d)
         @variable(m, c[ids])
         @variable(m, s[ids])
-        constrain_trig_var.(c, s, θl, θh, init)
+        constrain_trig_vars.(c, s, θl, θh, init)
 
-        E, pc, ps = build_eqs(d, r, α, M)
-        E = mapcoefficients.(round_zero, E)
+        E = chain_constraint_standard(d, r, α, M, c, s, m)
 
-        var_map = Dict([pc; ps] .=> [c; s])
-        lvars = lifting_vars!(m, E, var_map)
-        lift_poly.(Ref(lvars), E)
-        
-        @constraint m lE .== 0
+        @constraint m E .== 0
         @constraint m c .^ 2 .+ s .^ 2 .== 1
         @constraint m (c .+ 1) .* tan.(θl / 2) .- s .<= 0
         @constraint m (c .+ 1) .* tan.(θh / 2) .- s .>= 0
