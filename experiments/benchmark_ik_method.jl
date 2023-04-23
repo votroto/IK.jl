@@ -4,7 +4,7 @@ mean(xs) = sum(xs) / length(xs)
 no_warm_start(d, r, α, θl, θh, desired, θ, w) = θ
 
 function pose_error_sample(method, d, r, α, θl, θh, w, θ; warm_start)
-    desired = random_feasible_pose(d, r, α, θh, θl)
+    desired = random_feasible_pose(d, r, α, θl, θh)
     local_x = warm_start(d, r, α, θl, θh, desired, θ, w)
     
     x = method(d, r, α, θl, θh, desired, θ, w; init=local_x)

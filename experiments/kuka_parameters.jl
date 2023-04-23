@@ -11,5 +11,5 @@ function params_kuka_iiwa()
     w = normalize(ones(7), 1)
     θ = zeros(7)
 
-    r, d, α, θl, θh, w, θ
+    d, r, α, θl, θh, w, θ
 end

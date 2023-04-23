@@ -12,7 +12,7 @@ function params_icub_v3(n)
 	θ = (θl .+ θh) ./ 2
 
 	i = 11 - n
-	r[i:end], d[i:end], α[i:end], θl[i:end], θh[i:end], w, θ[i:end]
+	d[i:end], r[i:end], α[i:end], θl[i:end], θh[i:end], w, θ[i:end]
 end
 
 
@@ -26,5 +26,5 @@ function params_icub_v2(n)
 	θ = (θl .+ θh) ./ 2
 
 	i = 11 - n
-	r[i:end], d[i:end], α[i:end], θl[i:end], θh[i:end], w, θ[i:end]
+	d[i:end], r[i:end], α[i:end], θl[i:end], θh[i:end], w, θ[i:end]
 end

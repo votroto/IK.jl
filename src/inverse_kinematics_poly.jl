@@ -41,7 +41,7 @@ function solve_inverse_kinematics_poly(d, r, α, θl, θh, M, θ, w;
         @constraint m (c .+ 1) .* tan.(θl / 2) .- s .<= 0
         @constraint m (c .+ 1) .* tan.(θh / 2) .- s .>= 0
 
-        @objective m Min sum(2 .* w .* (1 .- c .* cos.(θ) .- s .* sin.(θ)))
+        @objective m Min sum(w .* lin_angdiff_approx.(c, s, θ))
         optimize!(m)
 
         extract_solution(c, s, m)
