@@ -3,7 +3,7 @@ function lin_angdiff_approx(cosx, sinx, y)
     2 * (1 - cosx * cos(y) - sinx * sin(y))
 end
 
-function constrain_trig_vars(c, s, θl, θh; init)
+function constrain_trig_vars(c, s, θl, θh, init)
     sl, sh = sin_min_max(θl, θh)
     cl, ch = cos_min_max(θl, θh)
 
@@ -23,16 +23,16 @@ function _split_manipulator(ids)
     f, reverse(collect(s))
 end
 
-function build_eqs(d, r, α, M)
+function build_eqs(d, r, α, c, s)
     T(i) = dh_lin_t(c[i], s[i], d[i], α[i], r[i])
     iT(i) = dh_lin_inv_t(c[i], s[i], d[i], α[i], r[i])
 
-    ids = eachindex(d)
-    fwd, rev = _split_manipulator(ids)
+    fwd, rev = _split_manipulator(eachindex(d))
 
-    @polyvar c[ids] s[ids]
+    f = map(T, fwd)
+    r = map(iT, rev)
 
-    prod(T, fwd) .- M * prod(iT, rev), c, s
+    f, r
 end
 
 function _default_optimizer()

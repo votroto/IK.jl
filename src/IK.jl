@@ -5,5 +5,6 @@ export solve_inverse_kinematics
 
 include("forward_kinematics.jl")
 include("inverse_kinematics.jl")
+include("utils.jl")
 
 end

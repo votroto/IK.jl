@@ -8,7 +8,7 @@ using MultivariatePolynomials
 include("utils.jl")
 include("jump_extensions.jl")
 include("denavit_hartenberg.jl")
-include("ik_modelling.jl")
+include("modelling.jl")
 
 function xlift_poly(vv, poly)
         function inner(mo)

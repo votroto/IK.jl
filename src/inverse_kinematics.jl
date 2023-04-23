@@ -1,14 +1,14 @@
-using Base.Iterators: peel, drop, take
+using Base.Iterators: drop, peel, take
 using DynamicPolynomials
 using Gurobi
-using SCIP
 using JuMP
 using MultivariatePolynomials
+using SCIP
 
 include("utils.jl")
 include("jump_extensions.jl")
 include("denavit_hartenberg.jl")
-include("ik_modelling.jl")
+include("modelling.jl")
 
 function map_monomials(f, poly)
         sum(coefficients(poly) .* map(f, monomials(poly)), init=0)

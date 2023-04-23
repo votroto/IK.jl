@@ -2,6 +2,8 @@ using JuMP
 
 import Base.:*
 Base.:*(a::GenericQuadExpr, b::GenericQuadExpr) = jump_quadratic_product(a, b)
+Base.:*(a::GenericAffExpr, b::GenericQuadExpr) = jump_quadratic_product(a, b)
+Base.:*(a::GenericQuadExpr, b::GenericAffExpr) = jump_quadratic_product(a, b)
 
 function _start_value(x)
         v = start_value(x)
@@ -22,11 +24,11 @@ end
 
 function jump_quadmono_lift(a, b)
         model = a.model
-        lower_bound, upper_bound = jump_quadratic_bounds(a, b)
+        lb, ub = jump_quadratic_bounds(a, b)
         start = jump_quadratic_start(a, b)
-        base_name = string(a) * string(b)
+        nam = "($a$b)"
 
-        v = @variable(model, lower_bound, upper_bound, start, base_name)
+        v = @variable(model, lower_bound=lb, upper_bound=ub, start=start, base_name=nam)
         @constraint(model, v == a * b)
 
         v
@@ -36,24 +38,22 @@ function jump_quadexpr_lift(a::QuadExpr; init=0)
         a.aff + sum(c * jump_quadmono_lift(x.a, x.b) for (x, c) in a.terms; init)
 end
 
-function jump_quadratic_product(a::QuadExpr, b::QuadExpr)
-        if a == 1
-                return b
-        elseif isempty(a.terms) && isempty(b.terms)
-                return a.aff * b.aff
-        end
+_simplify_type(a::QuadExpr) = isempty(a.terms) ? _simplify_type(a.aff) : a
+_simplify_type(a::AffExpr) = isempty(a.terms) ? a.constant : a
+_simplify_type(a) = a
 
-        jump_quadexpr_lift(a) * jump_quadexpr_lift(b)
+_jump_quadratic_product(a::QuadExpr, b::QuadExpr) = jump_quadexpr_lift(a) * jump_quadexpr_lift(b)
+_jump_quadratic_product(a::QuadExpr, b::AffExpr) = jump_quadexpr_lift(a) * b
+_jump_quadratic_product(a::VariableRef, b::QuadExpr) = a * jump_quadexpr_lift(b)
+_jump_quadratic_product(a::AffExpr, b::QuadExpr) = jump_quadratic_product(b, a)
+_jump_quadratic_product(a::QuadExpr, b::VariableRef) = jump_quadratic_product(b, a)
+_jump_quadratic_product(a, b) = a * b
+
+function jump_quadratic_product(a, b)
+        _jump_quadratic_product(_simplify_type(a), _simplify_type(b))
 end
 
 function jump_quadratic_product(a::AbstractMatrix, b::AbstractMatrix)
         is, js = axes(a)
-        [mapreduce(jump_quadratic_product, +, a[i, :], b[:, j]) for i in is, j in js]
+        [mapreduce(*, +, a[i, :], b[:, j]) for i in is, j in js]
 end
-
-jump_quadratic_product(a::QuadExpr, b::AffExpr) = jump_quadexpr_lift(a) * b
-jump_quadratic_product(a::VariableRef, b::QuadExpr) = a * jump_quadexpr_lift(b)
-
-jump_quadratic_product(a::AffExpr, b::QuadExpr) = jump_quadratic_product(b, a)
-jump_quadratic_product(a::QuadExpr, b::VariableRef) = jump_quadratic_product(b, a)
-jump_quadratic_product(a, b) = a * b

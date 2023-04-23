@@ -5,24 +5,18 @@ using SCIP
 using JuMP
 using MultivariatePolynomials
 
+include("modelling.jl")
 include("utils.jl")
 include("jump_extensions.jl")
 include("denavit_hartenberg.jl")
 
-function build_mat_eqs(d, r, α, c, s)
-        T(i) = dh_lin_t(c[i], s[i], d[i], α[i], r[i])
-        iT(i) = dh_lin_inv_t(c[i], s[i], d[i], α[i], r[i])
-
-        ids = eachindex(d)
-        fwd, rev = _split_manipulator(ids)
-
-        F = map(T, fwd)
-        R = map(iT, rev)
+function chain_constraint_mat(d, r, α, M, c, s)
+        F, R = build_eqs(d, r, α, c, s)
 
         LHS = _reduce(jump_quadratic_product, F)
         RHS = _reduce(jump_quadratic_product, R)
 
-        LHS, RHS
+        view(LHS .- M * RHS, 1:3, :)
 end
 
 function solve_inverse_kinematics_matrix(d, r, α, θl, θh, M, θ, w;
@@ -33,17 +27,16 @@ function solve_inverse_kinematics_matrix(d, r, α, θl, θh, M, θ, w;
         ids = eachindex(d)
         @variable(m, c[ids])
         @variable(m, s[ids])
-        constrain_trig_var.(c, s, θl, θh, init)
+        constrain_trig_vars.(c, s, θl, θh, init)
 
-        LHS, RHS = build_mat_eqs(d, r, α, c, s)
+        E = chain_constraint_mat(d, r, α, M, c, s)
         
-        @constraint m LHS .== M * RHS
+        @constraint m E .== 0
         @constraint m c .^ 2 .+ s .^ 2 .== 1
         @constraint m (c .+ 1) .* tan.(θl / 2) .- s .<= 0
         @constraint m (c .+ 1) .* tan.(θh / 2) .- s .>= 0
 
-        @objective m Min sum(w .* lin_angdiff_approx.(c, s, θ))
-
+        @objective m Min sum(2 .* w .* (1 .- c .* cos.(θ) .- s .* sin.(θ)))
         optimize!(m)
 
         extract_solution(c, s, m)
