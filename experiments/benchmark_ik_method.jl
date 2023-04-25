@@ -1,9 +1,10 @@
 include("../src/forward_kinematics.jl")
 
+uniform_pose_gen(d, r, α, θl, θh) = random_feasible_pose(d, r, α, -pi+eps(), pi-eps())
 no_warm_start(d, r, α, θl, θh, desired, θ, w) = θ, 0.0
 
-function stats_sample(method, d, r, α, θl, θh, w, θ; warm_start)
-    desired = random_feasible_pose(d, r, α, θl, θh)
+function stats_sample(method, d, r, α, θl, θh, w, θ; pose_gen, warm_start)
+    desired = pose_gen(d, r, α, θl, θh)
     local_x, local_obj = warm_start(d, r, α, θl, θh, desired, θ, w)
     
     x, obj, ret, tim = method(d, r, α, θl, θh, desired, θ, w; init=local_x)

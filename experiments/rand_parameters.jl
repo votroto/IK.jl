@@ -24,7 +24,12 @@ function params_random_6rad(joint_count)
 end
 
 function params_random_4rad(joint_count)
-	twist_rng(n) = continuous_uniform(n; low=-3.0, high=3.0) # check
+	twist_rng(n) = continuous_uniform(n; low=-3.0, high=3.0)
+	random_manipulator(joint_count; twist_rng, max_angle=2.0)
+end
+
+function params_random_4rad_2alpha(joint_count)
+	twist_rng(n) = continuous_uniform(n; low=-2.0, high=2.0)
 	random_manipulator(joint_count; twist_rng, max_angle=2.0)
 end
 

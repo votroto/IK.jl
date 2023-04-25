@@ -41,14 +41,15 @@ function _default_optimizer()
 end
 
 function _scip_optimizer()
-    SCIP.Optimizer
+    attrs = ["parallel/maxnthreads" => 4]
+    optimizer_with_attributes(SCIP.Optimizer, attrs...)
 end
 
 function extract_solution(c, s, m)
     stat = termination_status(m)
 
-    sol = has_values(m) ? atan.(value.(s), value.(c)) : missing
-    obj = stat == OPTIMAL ? objective_value(m) : missing
+    sol = has_values(m) ? atan.(value.(s), value.(c)) : fill(NaN, length(c))
+    obj = stat == OPTIMAL ? objective_value(m) : NaN
 
     sol, obj, stat, solve_time(m)
 end
