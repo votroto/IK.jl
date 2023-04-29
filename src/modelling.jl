@@ -29,7 +29,7 @@ end
 function _split_manipulator(ids)
     mid = div(length(ids), 2)
     f, s = take(ids, mid), drop(ids, mid)
-    
+
     f, reverse(collect(s))
 end
 
@@ -39,5 +39,5 @@ function build_eqs(d, r, α, c, s)
 
     fwd, rev = _split_manipulator(eachindex(d))
 
-    map(T, fwd),  map(iT, rev)
+    map(T, fwd), map(iT, rev)
 end
