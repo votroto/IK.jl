@@ -46,16 +46,12 @@ end
 """Creates the lifted pose constraint a la moment relaxations."""
 function lift_shor(d, r, α, M, c, s, model)
     ids = eachindex(d)
-    @polyvar pc[ids] ps[ids]
+    @polyvar C[ids] S[ids]
 
-    fwd, rev = build_eqs(d, r, α, pc, ps)
+    E = build_eqs_poly(d, r, α, C, S, M)
+    var_map = Dict([C; S] .=> [c; s])
+    lvars = lifting_vars_shor!(model, E, var_map)
+    lifted = lift_poly.(Ref(lvars), E)
 
-    chain_poly_dirty = prod(fwd) .- M * prod(rev)
-    chain_poly_clean = mapcoefficients.(round_zero, chain_poly_dirty)
-
-    var_map = Dict([pc; ps] .=> [c; s])
-    lvars = lifting_vars_shor!(model, chain_poly_clean, var_map)
-    chain_jump = lift_poly.(Ref(lvars), chain_poly_clean)
-
-    chain_jump
+    lifted
 end

@@ -6,11 +6,8 @@ function lift_adhoc(d, r, α, M, c, s)
     ids = eachindex(d)
     @polyvar C[ids] S[ids]
 
-    fwd, rev = build_eqs(d, r, α, C, S)
+    E = build_eqs_poly(d, r, α, C, S, M)
+    lifted = map(e -> e([C; S] => [c; s]), E)
 
-    chain_poly_dirty = prod(fwd) .- M * prod(rev)
-    chain_poly_clean = mapcoefficients.(round_zero, chain_poly_dirty)
-    chain_jump = map(e -> e([C; S] => [c; s]), chain_poly_clean)
-
-    chain_jump
+    lifted
 end
