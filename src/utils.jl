@@ -1,11 +1,13 @@
 using Base.Iterators: take, drop
 
+"""Rounds tiny values to zero"""
 round_zero(x; atol=1e-12) = abs(x) <= atol ? zero(x) : x
 
+"""Performs a tree-like fold over a magma `f`"""
 function _reduce(f, xs; init=1)
         n = length(xs)
 
-        if n == 0 
+        if n == 0
                 init
         elseif n == 1
                 first(xs)
@@ -16,6 +18,7 @@ function _reduce(f, xs; init=1)
         end
 end
 
+"""Finds the minimum and maximum of cos(x), for l <= x <= h"""
 function cos_min_max(l, h)
         if h - l >= 2pi
                 return -1.0, 1.0

@@ -4,8 +4,13 @@ include("./kuka_parameters.jl")
 include("./rand_parameters.jl")
 include("./icub_arm_parameters.jl")
 
+include("../src/utils.jl")
+include("../src/modelling.jl")
+include("../src/jump_extensions.jl")
+include("../src/denavit_hartenberg.jl")
+include("../src/forward_kinematics.jl")
 include("../src/inverse_kinematics.jl")
-include("../src/local_kinematics.jl")
+include("../src/lift/lift_matrix.jl")
 
 using Dates
 

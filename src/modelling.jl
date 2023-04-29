@@ -1,25 +1,32 @@
+function map_monomials(f, poly)
+    sum(coefficients(poly) .* map(f, monomials(poly)), init=0)
+end
 
-function lin_angdiff_approx(cosx, sinx, y)
+function lift_poly(lift_vars, poly)
+    map_monomials(e -> lift_vars[e], poly)
+end
+
+"""Linear proxy expression for minimizing abs(angdiff(x, y))"""
+function lin_angdiff_proxy(cosx, sinx, y)
     2 * (1 - cosx * cos(y) - sinx * sin(y))
 end
 
+function _set_vat_lb_ub_st(x, lb, ub, st)
+    set_lower_bound(x, lb)
+    set_upper_bound(x, ub)
+    set_start_value(x, st)
+end
+
+"""Sets the box constraints and the initial guess for cos(x) and sin(x)"""
 function constrain_trig_vars(c, s, θl, θh, init)
-    sl, sh = sin_min_max(θl, θh)
-    cl, ch = cos_min_max(θl, θh)
-
-    set_lower_bound(c, cl)
-    set_lower_bound(s, sl)
-
-    set_upper_bound(c, ch)
-    set_upper_bound(s, sh)
-
-    set_start_value(c, cos(init))
-    set_start_value(s, sin(init))
+    _set_vat_lb_ub_st(c, cos_min_max(θl, θh)..., cos(init))
+    _set_vat_lb_ub_st(s, sin_min_max(θl, θh)..., sin(init))
 end
 
 function _split_manipulator(ids)
     mid = div(length(ids), 2)
     f, s = take(ids, mid), drop(ids, mid)
+    
     f, reverse(collect(s))
 end
 
@@ -29,27 +36,10 @@ function build_eqs(d, r, α, c, s)
 
     fwd, rev = _split_manipulator(eachindex(d))
 
-    f = map(T, fwd)
-    r = map(iT, rev)
-
-    f, r
+    map(T, fwd),  map(iT, rev)
 end
 
-function _default_optimizer()
-    attrs = ["Nonconvex" => 2, "Presolve" => 2, "Threads" => 4]
-    optimizer_with_attributes(Gurobi.Optimizer, attrs...)
-end
-
-function _scip_optimizer()
-    attrs = ["parallel/maxnthreads" => 4]
-    optimizer_with_attributes(SCIP.Optimizer, attrs...)
-end
-
-function extract_solution(c, s, m)
-    stat = termination_status(m)
-
-    sol = has_values(m) ? atan.(value.(s), value.(c)) : fill(NaN, length(c))
-    obj = stat == OPTIMAL ? objective_value(m) : NaN
-
-    sol, obj, stat, solve_time(m)
-end
+"""Takes c = cos(x) and s = sin(x), computes the infeasibility of B <= x."""
+trig_lb_infeas(c, s, B) = (c + 1) * tan(B / 2) - s
+"""Takes c = cos(x) and s = sin(x), computes the infeasibility of x <= B."""
+trig_ub_infeas(c, s, B) = -trig_lb_infeas(c, s, B)

@@ -28,7 +28,12 @@ function jump_quadmono_lift(a, b)
         start = jump_quadratic_start(a, b)
         nam = "($a$b)"
 
-        v = @variable(model, lower_bound=lb, upper_bound=ub, start=start, base_name=nam)
+        v = @variable(model,
+                lower_bound = lb,
+                upper_bound = ub,
+                start = start,
+                base_name = nam
+        )
         @constraint(model, v == a * b)
 
         v

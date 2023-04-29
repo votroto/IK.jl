@@ -2,10 +2,6 @@ using Test
 
 using IK: cos_min_max, replicate
 
-function rand_between(x, y)
-    x + (y - x) * rand()
-end
-
 function test_cos_min_max_symmetric()
     l = rand_between(-pi+eps(), 0)
     h = rand_between(0, pi-eps())

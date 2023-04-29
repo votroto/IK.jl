@@ -3,11 +3,8 @@ using ADNLPModels
 using Ipopt
 using NLPModelsIpopt
 
-include("denavit_hartenberg.jl")
-include("modelling.jl")
-
 function build_obj(x, w, θ)
-        return sum(w .* lin_angdiff_approx.(cos.(x), sin.(x), θ))
+        return sum(w .* lin_angdiff_proxy.(cos.(x), sin.(x), θ))
 end
 
 function build_constr(x, d, r, α, M)
