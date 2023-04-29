@@ -10,9 +10,9 @@ function _start_value(x)
         isnothing(v) ? NaN : v
 end
 
-jump_quadratic_start(a, b) = _start_value(a) * _start_value(b)
+_q_prod_start(a, b) = _start_value(a) * _start_value(b)
 
-function jump_quadratic_bounds(a, b)
+function _q_prod_bounds(a, b)
         la = has_lower_bound(a) ? lower_bound(a) : -Inf
         ua = has_upper_bound(a) ? upper_bound(a) : Inf
         lb = has_lower_bound(b) ? lower_bound(b) : -Inf
@@ -22,40 +22,40 @@ function jump_quadratic_bounds(a, b)
         lo, hi
 end
 
-function jump_quadmono_lift(a, b)
+function _q_mono_lift(a, b)
         model = a.model
-        lb, ub = jump_quadratic_bounds(a, b)
-        start = jump_quadratic_start(a, b)
+        lb, ub = _q_prod_bounds(a, b)
+        start = _q_prod_start(a, b)
         nam = "($a$b)"
 
-        v = @variable(model,
+        var = @variable(model,
                 lower_bound = lb,
                 upper_bound = ub,
                 start = start,
                 base_name = nam
         )
-        @constraint(model, v == a * b)
+        @constraint(model, var == a * b)
 
-        v
+        var
 end
 
-function jump_quadexpr_lift(a::QuadExpr; init=0)
-        a.aff + sum(c * jump_quadmono_lift(x.a, x.b) for (x, c) in a.terms; init)
+function _q_expr_lift(a::QuadExpr; init=0)
+        a.aff + sum(c * _q_mono_lift(x.a, x.b) for (x, c) in a.terms; init)
 end
 
 _simplify_type(a::QuadExpr) = isempty(a.terms) ? _simplify_type(a.aff) : a
 _simplify_type(a::AffExpr) = isempty(a.terms) ? a.constant : a
 _simplify_type(a) = a
 
-_jump_quadratic_product(a::QuadExpr, b::QuadExpr) = jump_quadexpr_lift(a) * jump_quadexpr_lift(b)
-_jump_quadratic_product(a::QuadExpr, b::AffExpr) = jump_quadexpr_lift(a) * b
-_jump_quadratic_product(a::VariableRef, b::QuadExpr) = a * jump_quadexpr_lift(b)
-_jump_quadratic_product(a::AffExpr, b::QuadExpr) = jump_quadratic_product(b, a)
-_jump_quadratic_product(a::QuadExpr, b::VariableRef) = jump_quadratic_product(b, a)
-_jump_quadratic_product(a, b) = a * b
+_q_prod(a::QuadExpr, b::QuadExpr) = _q_expr_lift(a) * _q_expr_lift(b)
+_q_prod(a::QuadExpr, b::AffExpr) = _q_expr_lift(a) * b
+_q_prod(a::VariableRef, b::QuadExpr) = a * _q_expr_lift(b)
+_q_prod(a::AffExpr, b::QuadExpr) = jump_quadratic_product(b, a)
+_q_prod(a::QuadExpr, b::VariableRef) = jump_quadratic_product(b, a)
+_q_prod(a, b) = a * b
 
 function jump_quadratic_product(a, b)
-        _jump_quadratic_product(_simplify_type(a), _simplify_type(b))
+        _q_prod(_simplify_type(a), _simplify_type(b))
 end
 
 function jump_quadratic_product(a::AbstractMatrix, b::AbstractMatrix)
