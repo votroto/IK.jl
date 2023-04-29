@@ -10,6 +10,7 @@ include("../src/jump_extensions.jl")
 include("../src/denavit_hartenberg.jl")
 include("../src/forward_kinematics.jl")
 include("../src/inverse_kinematics.jl")
+include("../src/local_kinematics.jl")
 include("../src/lift/lift_matrix.jl")
 
 using Dates

@@ -8,6 +8,8 @@ include("modelling.jl")
 include("jump_extensions.jl")
 include("denavit_hartenberg.jl")
 include("forward_kinematics.jl")
+include("lift/lift_matrix.jl")
+include("local_kinematics.jl")
 include("inverse_kinematics.jl")
 
 end

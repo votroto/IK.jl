@@ -1,15 +1,5 @@
-using Base.Iterators: peel, drop, take
-using DynamicPolynomials
-using Gurobi
-using SCIP
-using JuMP
-using MultivariatePolynomials
-
-include("../utils.jl")
-include("../jump_extensions.jl")
-include("../denavit_hartenberg.jl")
-include("../modelling.jl")
-
+"""Creates the lifted pose constraint by multiplying matrices and adding lifting 
+variables as needed."""
 function lift_matrix(d, r, α, M, c, s)
         F, R = build_eqs(d, r, α, c, s)
 

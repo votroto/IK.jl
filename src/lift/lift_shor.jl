@@ -1,14 +1,5 @@
-using Base.Iterators: peel, drop, take
 using DynamicPolynomials
-using Gurobi
-using SCIP
-using JuMP
 using MultivariatePolynomials
-
-include("../utils.jl")
-include("../jump_extensions.jl")
-include("../denavit_hartenberg.jl")
-include("../modelling.jl")
 
 function lifting_vars_shor!(m, eqs, var_map)
         eq_ms = unique(sort(mapreduce(monomials, vcat, eqs)))
@@ -40,9 +31,9 @@ function lifting_vars_shor!(m, eqs, var_map)
                         else
                                 JuMP.delete(m, W[i, j])
                         end
-
                 end
         end
+
         for v in eq_vs
                 i = findfirst(x -> x == v, fms)
                 @constraint m W[i, 1] == var_map[v]
@@ -52,6 +43,7 @@ function lifting_vars_shor!(m, eqs, var_map)
         vv
 end
 
+"""Creates the lifted pose constraint a la moment relaxations."""
 function lift_shor(d, r, α, M, c, s, model)
         ids = eachindex(d)
         @polyvar pc[ids] ps[ids]

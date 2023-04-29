@@ -15,7 +15,7 @@ function test_cos_min_max_single_sided()
     @test cos_min_max(l, h) == (cos(h), cos(l))
 end
 
-@testset "cos_min_max" begin
+@testset "lin-trig box" begin
     for i in 1:100
             test_cos_min_max_symmetric()
             test_cos_min_max_single_sided()

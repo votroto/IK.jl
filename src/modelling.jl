@@ -7,9 +7,12 @@ function lift_poly(lift_vars, poly)
 end
 
 """Linear proxy expression for minimizing abs(angdiff(x, y))"""
-function lin_angdiff_proxy(cosx, sinx, y)
+function lin_abs_angdiff_proxy(cosx, sinx, y)
     2 * (1 - cosx * cos(y) - sinx * sin(y))
 end
+
+"""Linear proxy for angdiff(x, y)"""
+lin_angdiff_proxy(cosx, sinx, y) = -((cosx + 1) * tan(y / 2) - sinx)
 
 function _set_vat_lb_ub_st(x, lb, ub, st)
     set_lower_bound(x, lb)
@@ -38,8 +41,3 @@ function build_eqs(d, r, α, c, s)
 
     map(T, fwd),  map(iT, rev)
 end
-
-"""Takes c = cos(x) and s = sin(x), computes the infeasibility of B <= x."""
-trig_lb_infeas(c, s, B) = (c + 1) * tan(B / 2) - s
-"""Takes c = cos(x) and s = sin(x), computes the infeasibility of x <= B."""
-trig_ub_infeas(c, s, B) = -trig_lb_infeas(c, s, B)
