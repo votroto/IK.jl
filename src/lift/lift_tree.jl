@@ -26,7 +26,7 @@ function lift_tree(d, r, α, M, c, s)
     ids = eachindex(d)
     @polyvar C[ids] S[ids]
 
-    E = build_eqs_poly(d, r, α, C, S, M)
+    E = build_pose_constraint_poly(d, r, α, C, S, M)
     var_map = Dict([C; S] .=> [c; s])
     lvars = lifting_vars_tree!(E, var_map)
     lifted = lift_poly.(Ref(lvars), E)

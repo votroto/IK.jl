@@ -33,7 +33,7 @@ function _split_manipulator(ids)
     f, reverse(collect(s))
 end
 
-function build_eqs(d, r, α, c, s)
+function build_pose_constraint(d, r, α, c, s)
     T(i) = dh_lin_t(c[i], s[i], d[i], α[i], r[i])
     iT(i) = dh_lin_inv_t(c[i], s[i], d[i], α[i], r[i])
 
@@ -43,8 +43,8 @@ function build_eqs(d, r, α, c, s)
 	
 end
 
-function build_eqs_poly(d, r, α, c, s, M)
-	fwd, rev = build_eqs(d, r, α, c, s)
+function build_pose_constraint_poly(d, r, α, c, s, M)
+	fwd, rev = build_pose_constraint(d, r, α, c, s)
 	
     chain_poly_dirty = prod(fwd) - M * prod(rev)
     chain_poly_clean = mapcoefficients.(round_zero, chain_poly_dirty)

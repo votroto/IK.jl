@@ -26,13 +26,13 @@ function _q_mono_lift(a, b)
     model = a.model
     lb, ub = _q_prod_bounds(a, b)
     start = _q_prod_start(a, b)
-    nam = "($a$b)"
+    name = "($a$b)"
 
     var = @variable(model,
         lower_bound = lb,
         upper_bound = ub,
         start = start,
-        base_name = nam
+        base_name = name
     )
     @constraint(model, var == a * b)
 

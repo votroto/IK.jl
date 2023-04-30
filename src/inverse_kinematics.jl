@@ -11,7 +11,7 @@ function _default_optimizer()
     )
 end
 
-function extract_solution(c, s, m)
+function _extract_solution(c, s, m)
     stat = termination_status(m)
 
     vs = clamp.(value.(s), -1, 1)
@@ -23,6 +23,13 @@ function extract_solution(c, s, m)
     sol, obj, stat, solve_time(m)
 end
 
+"""
+    solve_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
+    lift_method=lift_matrix, optimizer=_default_optimizer(), init=θ)
+
+Computes the global inverse kinematics solution using a chosen lift_method, 
+starting from `init`.
+"""
 function solve_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
     lift_method=lift_matrix, optimizer=_default_optimizer(), init=θ)
 
@@ -41,5 +48,5 @@ function solve_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
     @objective m Min sum(w .* lin_abs_angdiff_proxy.(c, s, θ))
     optimize!(m)
 
-    extract_solution(c, s, m)
+    _extract_solution(c, s, m)
 end
