@@ -14,10 +14,10 @@ end
 function _extract_solution(c, s, m)
     stat = termination_status(m)
 
-    vs = clamp.(value.(s), -1, 1)
-    vc = clamp.(value.(c), -1, 1)
+    vs = has_values(m) ? clamp.(value.(s), -1, 1) : fill(NaN, length(c))
+    vc = has_values(m) ? clamp.(value.(c), -1, 1) : fill(NaN, length(c))
 
-    sol = has_values(m) ? atan.(vs, vc) : fill(NaN, length(c))
+    sol = atan.(vs, vc)
     obj = stat == OPTIMAL ? objective_value(m) : NaN
 
     sol, obj, stat, solve_time(m)
