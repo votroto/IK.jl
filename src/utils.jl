@@ -24,13 +24,9 @@ function cos_min_max(l, h)
         return -1.0, 1.0
     end
 
-    _l = round(l / (0.5pi)) - 1
-    _h = round(h / (0.5pi)) + 1
-
-    crit = [0.5pi * i for i in _l:_h]
-    filter!(x -> l <= x <= h, crit)
-    vals = [crit; l; h]
-    minimum(cos, vals), maximum(cos, vals)
+    ql = 0.5pi * ceil(l / (0.5pi))
+    crit = [ql:0.5pi:h; l; h]
+    minimum(cos, crit), maximum(cos, crit)
 end
 
 function sin_min_max(l, h)
