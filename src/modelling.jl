@@ -40,7 +40,6 @@ function build_pose_constraint(d, r, α, c, s)
     fwd, rev = _split_manipulator(eachindex(d))
 
     map(T, fwd), map(iT, rev)
-	
 end
 
 function build_pose_constraint_poly(d, r, α, c, s, M)

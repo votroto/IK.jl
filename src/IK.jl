@@ -13,4 +13,6 @@ include("lift/lift_matrix.jl")
 include("local_kinematics.jl")
 include("inverse_kinematics.jl")
 
+include("solve_position_priority.jl")
+
 end

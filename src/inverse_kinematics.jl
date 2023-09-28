@@ -4,7 +4,7 @@ using Gurobi
 function _default_optimizer()
     optimizer_with_attributes(
         Gurobi.Optimizer,
-        MOI.Silent() => true,
+        #MOI.Silent() => true,
         "Nonconvex" => 2,
         "Presolve" => 2,
         "Threads" => 4
