@@ -1,6 +1,6 @@
 using LinearAlgebra
 
-#from https://github.com/robotology/icub-main/blob/master/src/libraries/iKin/src/iKinFwd.cpp
+# https://github.com/robotology/icub-main/blob/master/src/libraries/iKin/src/iKinFwd.cpp
 
 function params_icub_v3(n)
 	r = [0.0725 0.0 -0.0304112 0.0 0.0 -0.01065 0.0146593 -0.0020075 0.0 0.0625]
