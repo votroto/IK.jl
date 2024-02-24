@@ -12,7 +12,7 @@ end
 function random_bounded_pose(xmin, xmax, ymin, ymax, zmin, zmax)
     function _rotmat(w, theta)
         bw = [0 -w[3] w[2]; w[3] 0 -w[1]; -w[2] w[1] 0]
-        Matrix(I, 3, 3) + sin(theta)*bw + (1-cos(theta))*bw*bw
+        Matrix(I, 3, 3) + sin(theta) * bw + (1 - cos(theta)) * bw * bw
     end
 
     function _inner(d, r, α, θl, θh)
@@ -22,9 +22,9 @@ function random_bounded_pose(xmin, xmax, ymin, ymax, zmin, zmax)
         z = zmin + rand() * (zmax - zmin)
 
         [
-            R[1,1] R[1,2] R[1,3] x
-            R[2,1] R[2,2] R[2,3] y
-            R[3,1] R[3,2] R[3,3] z
+            R[1, 1] R[1, 2] R[1, 3] x
+            R[2, 1] R[2, 2] R[2, 3] y
+            R[3, 1] R[3, 2] R[3, 3] z
             0 0 0 1
         ]
     end

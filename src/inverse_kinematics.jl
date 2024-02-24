@@ -27,7 +27,7 @@ end
     solve_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
     lift_method=lift_matrix, optimizer=_default_optimizer(), init=θ)
 
-Computes the global inverse kinematics solution using a chosen lift_method, 
+Computes the global inverse kinematics solution using a chosen lift_method,
 starting from `init`.
 """
 function solve_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
