@@ -28,3 +28,4 @@ function params_icub_v2(n)
 	i = 11 - n
 	d[i:end], r[i:end], α[i:end], θl[i:end], θh[i:end], w, θ[i:end]
 end
+

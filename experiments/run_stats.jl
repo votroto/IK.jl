@@ -1,6 +1,7 @@
 include("./benchmark_ik_method.jl")
 
 include("./kuka_parameters.jl")
+include("./canadarm_parameters.jl")
 include("./rand_parameters.jl")
 include("./icub_arm_parameters.jl")
 
@@ -30,6 +31,7 @@ function parse_args(arg_pose, arg_param, arg_warm, arg_samples)
 
     opts_param = Dict(
         "kuka" => params_kuka_iiwa(),
+        "canadarm2" => params_canadarm2(),
         "rand_6rad" => params_random_6rad(7),
         "rand_4rad" => params_random_4rad(7),
         "rand_orth" => params_random_orth(7),
@@ -58,7 +60,8 @@ function run_experiment(_pose, _params, _warm, _samples)
     open("DATA_$info_line.txt", "w") do f
         println(f, "# $info_line")
         println(f, "# loc_err rot_err obj local_obj tim ret")
-        for _ in 1:samples
+        for jiji in 1:samples
+            println(jiji)
             result = stats_sample(ik_method, params...; pose_gen, warm_start)
             println(f, join(result, " "))
         end

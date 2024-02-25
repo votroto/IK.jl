@@ -21,7 +21,8 @@ function parse_args(arg_pose, arg_param, arg_samples)
 
     opts_pose = Dict(
         "uniform" => uniform_pose_gen,
-        "feasible" => random_feasible_pose
+        "feasible" => random_feasible_pose,
+        "kuka_bounded" => random_bounded_pose(-0.8, 0.8, -0.8, 0.8, 0.0, 1.0),
     )
 
     opts_param = Dict(
