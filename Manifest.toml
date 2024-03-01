@@ -2,7 +2,7 @@
 
 julia_version = "1.10.0"
 manifest_format = "2.0"
-project_hash = "d0feabf72695745bd864cc35b4948388502ba447"
+project_hash = "2c013f12fdd32d9202fe9de6289b288bda32d2fe"
 
 [[deps.ADNLPModels]]
 deps = ["ColPack", "ForwardDiff", "LinearAlgebra", "NLPModels", "Requires", "ReverseDiff", "SparseArrays"]
@@ -78,6 +78,23 @@ git-tree-sha1 = "2a518018a2b888ba529e944d34d4bd84b54d652d"
 uuid = "f218ff0c-cb54-5151-80c4-c0f62c730ce6"
 version = "0.3.0+0"
 
+[[deps.ColorTypes]]
+deps = ["FixedPointNumbers", "Random"]
+git-tree-sha1 = "eb7f0f8307f71fac7c606984ea5fb2817275d6e4"
+uuid = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
+version = "0.11.4"
+
+[[deps.Colors]]
+deps = ["ColorTypes", "FixedPointNumbers", "Reexport"]
+git-tree-sha1 = "fc08e5930ee9a4e03f84bfb5211cb54e7769758a"
+uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
+version = "0.12.10"
+
+[[deps.CommonSolve]]
+git-tree-sha1 = "0eee5eb66b1cf62cd6ad1b460238e60e4b09400c"
+uuid = "38540f10-b2f7-11e9-35d8-d573e4eb0ff2"
+version = "0.2.4"
+
 [[deps.CommonSubexpressions]]
 deps = ["MacroTools", "Test"]
 git-tree-sha1 = "7b8a93dba8af7e3b42fecabf646260105ac373f7"
@@ -150,6 +167,12 @@ version = "0.3.2"
 
 [[deps.FileWatching]]
 uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
+
+[[deps.FixedPointNumbers]]
+deps = ["Statistics"]
+git-tree-sha1 = "335bfdceacc84c5cdf16aadc768aa5ddfc5383cc"
+uuid = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
+version = "0.8.4"
 
 [[deps.ForwardDiff]]
 deps = ["CommonSubexpressions", "DiffResults", "DiffRules", "LinearAlgebra", "LogExpFunctions", "NaNMath", "Preferences", "Printf", "Random", "SpecialFunctions"]
@@ -337,6 +360,18 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
 version = "2023.1.10"
 
+[[deps.MultivariateBases]]
+deps = ["MultivariatePolynomials", "MutableArithmetics"]
+git-tree-sha1 = "f63fcfbfaacbeef0230c17130e0de5133275ae05"
+uuid = "be282fd4-ad43-11e9-1d11-8bd9d7e43378"
+version = "0.2.1"
+
+[[deps.MultivariateMoments]]
+deps = ["Colors", "CommonSolve", "LinearAlgebra", "MultivariateBases", "MultivariatePolynomials", "MutableArithmetics", "REPL", "RecipesBase", "RowEchelon", "SemialgebraicSets", "SparseArrays"]
+git-tree-sha1 = "6b286f829dccc8b080ed34a99cb39abea0afb6ca"
+uuid = "f4abf1af-0426-5881-a0da-e2f168889b5e"
+version = "0.4.6"
+
 [[deps.MultivariatePolynomials]]
 deps = ["ChainRulesCore", "DataStructures", "LinearAlgebra", "MutableArithmetics"]
 git-tree-sha1 = "769c9175942d91ed9b83fa929eee4fe6a1d128ad"
@@ -409,6 +444,12 @@ deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 version = "1.10.0"
 
+[[deps.PolyJuMP]]
+deps = ["DataStructures", "DynamicPolynomials", "JuMP", "LinearAlgebra", "MathOptInterface", "MultivariateBases", "MultivariateMoments", "MultivariatePolynomials", "MutableArithmetics", "SemialgebraicSets"]
+git-tree-sha1 = "9a7d96a46320c673a0296cc75d7c6a63918dc4f2"
+uuid = "ddf597a6-d67e-5340-b84c-e37d84115374"
+version = "0.7.1"
+
 [[deps.PrecompileTools]]
 deps = ["Preferences"]
 git-tree-sha1 = "03b4c25b43cb84cee5c90aa9b5ea0a78fd848d2f"
@@ -449,6 +490,12 @@ git-tree-sha1 = "9f0a1b71baaf7650f4fa8a1d168c7fb6ee41f0c9"
 uuid = "c1ae055f-0cd5-4b69-90a6-9a35b1a98df9"
 version = "0.1.0"
 
+[[deps.RecipesBase]]
+deps = ["PrecompileTools"]
+git-tree-sha1 = "5c3d09cc4f31f5fc6af001c250bf1278733100ff"
+uuid = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
+version = "1.3.4"
+
 [[deps.Reexport]]
 git-tree-sha1 = "45e428421666073eab6f2da5c9d310d99bb12f9b"
 uuid = "189a3867-3050-52da-a836-e630ba90ab69"
@@ -466,6 +513,12 @@ git-tree-sha1 = "d1235bdd57a93bd7504225b792b867e9a7df38d5"
 uuid = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
 version = "1.15.1"
 
+[[deps.RowEchelon]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "f479526c4f6efcbf01e7a8f4223d62cfe801c974"
+uuid = "af85af4c-bcd5-5d23-b03a-a909639aa875"
+version = "0.2.1"
+
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 version = "0.7.0"
@@ -475,6 +528,12 @@ deps = ["Artifacts", "CompilerSupportLibraries_jll", "Hwloc_jll", "JLLWrappers",
 git-tree-sha1 = "34b9dacd687cace8aa4d550e3e9bb8615f1a61e9"
 uuid = "319450e9-13b8-58e8-aa9f-8fd1420848ab"
 version = "2024.1.18+0"
+
+[[deps.SemialgebraicSets]]
+deps = ["CommonSolve", "LinearAlgebra", "MultivariatePolynomials", "MutableArithmetics", "Random"]
+git-tree-sha1 = "e2ef2a54ae1a51fc4c5b0c92e3d9ec9e05296e7f"
+uuid = "8e049039-38e8-557d-ae3a-bc521ccf6204"
+version = "0.3.2"
 
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"

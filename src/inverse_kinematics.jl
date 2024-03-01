@@ -1,3 +1,4 @@
+using PolyJuMP
 using JuMP
 using Gurobi
 
@@ -31,10 +32,10 @@ Computes the global inverse kinematics solution using a chosen lift_method,
 starting from `init`.
 """
 function solve_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
-    lift_method=lift_tree, optimizer=_default_optimizer(), init=θ)
+    lift_method=lift_adhoc, optimizer=_default_optimizer(), init=θ)
 
     ids = eachindex(d)
-    m = Model(optimizer)
+    m = Model(() -> PolyJuMP.QCQP.Optimizer(Gurobi.Optimizer()))
 
     @variable(m, c[ids])
     @variable(m, s[ids])
