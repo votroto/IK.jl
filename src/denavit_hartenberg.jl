@@ -31,7 +31,7 @@ function dh_lin_t(c, s, d, α, r)
     z * x
 end
 
-function dq_lin(c, s, d, α, r)
+function _dq_lin(c, s, d, α, r)
     S = Quaternion(0, SA[0, 0, d])
     Z = Quaternion(c, SA[0, 0, s])
     A = Quaternion(0, SA[r, 0, 0])
@@ -43,8 +43,11 @@ function dq_lin(c, s, d, α, r)
     ZZ*XX
 end
 
-dq_lin_inv(c, s, d, α, r) = dq_lin(c, s, d, α, r)'
+dq_lin(c, s, d, α, r) = _dq_lin(c, s, d, α, r)
+dq_lin_inv(c, s, d, α, r) = _dq_lin(c, s, d, α, r)'
+
 dq(x, d, α, r) = dq_lin(cos(x), sin(x), d, α, r)
 dq_inv(x, d, α, r) = dq_lin_inv(cos(x), sin(x), d, α, r)
+
 dh_t(x, d, α, r) = dh_lin_t(cos(x), sin(x), d, α, r)
 dh_inv_t(x, d, α, r) = dh_lin_inv_t(cos(x), sin(x), d, α, r)
