@@ -4,7 +4,7 @@ using Gurobi
 function _default_optimizer()
     optimizer_with_attributes(
         Gurobi.Optimizer,
-        MOI.Silent() => true,
+        #MOI.Silent() => true,
         "Nonconvex" => 2,
         "Presolve" => 2,
         "Threads" => 4
@@ -31,7 +31,7 @@ Computes the global inverse kinematics solution using a chosen lift_method,
 starting from `init`.
 """
 function solve_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
-    lift_method=lift_matrix, optimizer=_default_optimizer(), init=θ)
+    lift_method=lift_tree, optimizer=_default_optimizer(), init=θ)
 
     ids = eachindex(d)
     m = Model(optimizer)

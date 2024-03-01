@@ -1,9 +1,9 @@
 using JuMP
 
 import Base.:*
-Base.:*(a::GenericQuadExpr, b::GenericQuadExpr) = jump_quadratic_product(a, b)
-Base.:*(a::GenericAffExpr, b::GenericQuadExpr) = jump_quadratic_product(a, b)
-Base.:*(a::GenericQuadExpr, b::GenericAffExpr) = jump_quadratic_product(a, b)
+Base.:*(a::QuadExpr, b::QuadExpr) = jump_quadratic_product(a, b)
+Base.:*(a::AffExpr, b::QuadExpr) = jump_quadratic_product(a, b)
+Base.:*(a::QuadExpr, b::AffExpr) = jump_quadratic_product(a, b)
 
 function _start_value(x)
     v = start_value(x)
@@ -26,7 +26,7 @@ function _q_mono_lift(a, b)
     model = a.model
     lb, ub = _q_prod_bounds(a, b)
     start = _q_prod_start(a, b)
-    name = "($a$b)"
+    name = "[$a$b]"
 
     var = @variable(model,
         lower_bound = lb,

@@ -30,6 +30,24 @@ function lift_tree(d, r, α, M, c, s)
     var_map = Dict([C; S] .=> [c; s])
     lvars = lifting_vars_tree!(E, var_map)
     lifted = lift_poly.(Ref(lvars), E)
+    display.(round.(E; digits=3))
+    
+    lifted
+end
 
+
+
+"""Creates the lifted pose constraint by allowing for cancellations and pre-
+computing lifting variables in a tree-like pattern."""
+function lift_tree_q(d, r, α, M, c, s)
+    ids = eachindex(d)
+    @polyvar C[ids] S[ids]
+
+    E = build_pose_constraint_poly_q(d, r, α, C, S, M)
+    var_map = Dict([C; S] .=> [c; s])
+    lvars = lifting_vars_tree!(E, var_map)
+    lifted = lift_poly.(Ref(lvars), E)
+
+    display.(round.(E; digits=3))
     lifted
 end

@@ -11,7 +11,9 @@ include("../src/denavit_hartenberg.jl")
 include("../src/forward_kinematics.jl")
 include("../src/inverse_kinematics.jl")
 include("../src/local_kinematics.jl")
-include("../src/lift/lift_matrix.jl")
+include("../src/lift/lift_tree.jl")
+
+include("../src/quaternion.jl")
 
 using Dates
 
@@ -55,7 +57,7 @@ function run_experiment(_pose, _params, _warm, _samples)
     ik_method = solve_inverse_kinematics
 
     println("$info_line")
-    open("DATA_$info_line.txt", "w") do f
+    open("/tmp/DATA_$info_line.txt", "w") do f
         println(f, "# $info_line")
         println(f, "# loc_err rot_err obj local_obj tim ret")
         for _ in 1:samples
