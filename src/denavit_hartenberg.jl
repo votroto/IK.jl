@@ -46,8 +46,8 @@ end
 dq_lin(c, s, d, α, r) = _dq_lin(c, s, d, α, r)
 dq_lin_inv(c, s, d, α, r) = _dq_lin(c, s, d, α, r)'
 
-dq(x, d, α, r) = dq_lin(cos(x), sin(x), d, α, r)
-dq_inv(x, d, α, r) = dq_lin_inv(cos(x), sin(x), d, α, r)
+dq(x, d, α, r) = dq_lin(cos(x/2), sin(x/2), d, α, r)
+dq_inv(x, d, α, r) = dq_lin_inv(cos(x/2), sin(x/2), d, α, r)
 
 dh_t(x, d, α, r) = dh_lin_t(cos(x), sin(x), d, α, r)
 dh_inv_t(x, d, α, r) = dh_lin_inv_t(cos(x), sin(x), d, α, r)

@@ -17,6 +17,9 @@ include("../src/quaternion.jl")
 
 d, r, α, θl, θh, w, θ = params_random_4rad(7)
 
-desiredh = random_feasible_pose(d, r, α, θl, θh)
+desiredh, desiredq = random_feasible_pose_hq(d, r, α, θl, θh)
 
-xh, objh, reth, timh = solve_inverse_kinematics(d, r, α, θl, θh, desiredh, θ, w; lift_method=lift_tree)
+local_inverse_kinematics(d, r, α, θl, θh, desiredh, θ, w)
+local_inverse_kinematics_q(d, r, α, θl, θh, desiredq, θ, w)
+
+#xh, objh, reth, timh = solve_inverse_kinematics(d, r, α, θl, θh, desiredq, θ, w; lift_method=lift_tree_q)

@@ -29,6 +29,7 @@ struct DualQuaternion
     d::Quaternion
 end
 
+Base.zero(::Type{DualQuaternion}) = DualQuaternion(zero(Quaternion), zero(Quaternion))
 Base.:(+)(a::DualQuaternion, b::DualQuaternion) = DualQuaternion(a.r + b.r, a.d + b.d)
 Base.:(-)(a::DualQuaternion, b::DualQuaternion) = DualQuaternion(a.r - b.r, a.d - b.d)
 Base.:(*)(n::Number, a::DualQuaternion) = DualQuaternion(n * a.r, n * a.d)
@@ -42,3 +43,4 @@ norm(a::DualQuaternion) = sqrt(circ(a, a))
 part_scalar(a::DualQuaternion) = DualQuaternion(part_scalar(a.r), part_scalar(a.d))
 part_vector(a::DualQuaternion) = DualQuaternion(part_vector(a.r), part_vector(q.d))
 Base.vec(a::DualQuaternion) = [vec(a.r); vec(a.d)]
+norm(a::DualQuaternion) = sqrt(a.r * a.d')
