@@ -42,8 +42,8 @@ function solve_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
 
     @constraint m lift_method(d, r, α, M, c, s) .== 0
     @constraint m c .^ 2 .+ s .^ 2 .== 1
-    @constraint m lin_angdiff_proxy.(c, s, θl) .>= 0
-    @constraint m lin_angdiff_proxy.(c, s, θh) .<= 0
+    #@constraint m lin_angdiff_proxy.(c, s, θl) .>= 0
+    #@constraint m lin_angdiff_proxy.(c, s, θh) .<= 0
 
     @objective m Min sum(w .* lin_abs_angdiff_proxy.(c, s, θ))
     optimize!(m)

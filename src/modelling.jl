@@ -25,8 +25,8 @@ function constrain_trig_vars(c, s, θl, θh, init)
     #_set_vat_lb_ub_st(c, cos_min_max(θl, θh)..., cos(init))
     #_set_vat_lb_ub_st(s, sin_min_max(θl, θh)..., sin(init))
 
-    _set_vat_lb_ub_st(c, -pi, pi, cos(init))
-    _set_vat_lb_ub_st(s, -pi, pi, sin(init))
+    _set_vat_lb_ub_st(c, -1, 1, cos(init))
+    _set_vat_lb_ub_st(s, -1, 1, sin(init))
 end
 
 function _split_manipulator(ids)
@@ -68,8 +68,8 @@ end
 function build_pose_constraint_poly_q(d, r, α, c, s, M)
 	fwd, rev = build_pose_constraint_q(d, r, α, c, s)
 	
-    chain_poly_dirty = vec(prod(fwd) - M * prod(rev))
-    chain_poly_clean = mapcoefficients.(round_zero, chain_poly_dirty)
+    chain_poly_dirty = prod(fwd) - M * prod(rev)
+    chain_poly_clean = mapcoefficients.(round_zero, vec(chain_poly_dirty))
 
 	chain_poly_clean
 end

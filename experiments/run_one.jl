@@ -15,11 +15,12 @@ include("../src/lift/lift_tree.jl")
 
 include("../src/quaternion.jl")
 
-d, r, α, θl, θh, w, θ = params_random_4rad(7)
+d, r, α, θl, θh, w, θ = params_random_6rad(7)
 
 desiredh, desiredq = random_feasible_pose_hq(d, r, α, θl, θh)
 
-local_inverse_kinematics(d, r, α, θl, θh, desiredh, θ, w)
-local_inverse_kinematics_q(d, r, α, θl, θh, desiredq, θ, w)
+θi, obji = local_inverse_kinematics(d, r, α, θl, θh, desiredh, θ, w)
+#local_inverse_kinematics_q(d, r, α, θl, θh, desiredq, θ, w)
 
-#xh, objh, reth, timh = solve_inverse_kinematics(d, r, α, θl, θh, desiredq, θ, w; lift_method=lift_tree_q)
+xh, objh, reth, timh = solve_inverse_kinematics(d, r, α, θl, θh, desiredh, θi, w; lift_method=lift_tree)
+xq, objq, retq, timq = solve_inverse_kinematics(d, r, α, θl/2, θh/2, desiredq, θi, w; lift_method=lift_tree_q)
