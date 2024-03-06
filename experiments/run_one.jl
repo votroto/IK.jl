@@ -21,7 +21,7 @@ d, r, α, θl, θh, w, θ = params_kuka_iiwa()
 
 desiredh, desiredq = random_feasible_pose_hq(d, r, α, θl, θh)
 
-θi, obji = local_inverse_kinematics(d, r, α, θl, θh, desiredh, θ, w)
+#θi, obji = local_inverse_kinematics(d, r, α, θl, θh, desiredh, θ, w)
 
 #xh, objh, reth, timh = solve_inverse_kinematics(d, r, α, θl, θh, desiredh, θi, w; lift_method=lift_matrix)
-xq, objq, retq, timq = solve_inverse_kinematics(d, r, α, θl/2, θh/2, desiredq, θi, w; lift_method=lift_matrix_q)
+xq, objq, retq, timq = solve_inverse_kinematics(d, r, α, θl/2, θh/2, desiredq, θ, w; lift_method=lift_matrix_q)

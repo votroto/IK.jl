@@ -9,12 +9,14 @@ end
 Quaternion(O::Number, v::Number) = Quaternion(O, SA[v, v, v])
 Quaternion(O::Number) = Quaternion(O, 0)
 
+_dot(a, b) = sum(a[i] * b[i] for i in eachindex(a))
+
 Base.zero(::Type{Quaternion}) = Quaternion(0, SA[0, 0, 0])
 Base.one(::Type{Quaternion}) = Quaternion(1, SA[0, 0, 0])
 Base.:(+)(a::Quaternion, b::Quaternion) = Quaternion(a.q0 + b.q0, a.q_ + b.q_)
 Base.:(-)(a::Quaternion, b::Quaternion) = Quaternion(a.q0 - b.q0, a.q_ - b.q_)
 Base.:(*)(r::Number, a::Quaternion) = Quaternion(r * a.q0, r * a.q_)
-Base.:(*)(a::Quaternion, b::Quaternion) = Quaternion(a.q0 * b.q0 - dot(a.q_, b.q_), a.q0 * b.q_ + b.q0 * a.q_ + cross(a.q_, b.q_))
+Base.:(*)(a::Quaternion, b::Quaternion) = Quaternion(a.q0 * b.q0 - _dot(a.q_, b.q_), a.q0 * b.q_ + b.q0 * a.q_ + cross(a.q_, b.q_))
 Base.:(/)(a::Quaternion, r::Number) = 1 / r * a
 Base.adjoint(a::Quaternion) = Quaternion(a.q0, -a.q_)
 dot(a::Quaternion, b::Quaternion) = (a'b + b'a) / 2
