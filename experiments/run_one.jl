@@ -15,8 +15,13 @@ include("../src/lift/lift_matrix.jl")
 include("../src/inverse_kinematics.jl")
 include("../src/local_kinematics.jl")
 
-d, r, α, θl, θh, w, θ = params_icub_v2(10)
+include("../src/quaternion.jl")
 
-desiredh = random_feasible_pose(d, r, α, θl, θh)
-xl, objl = local_inverse_kinematics(d, r, α, θl, θh, desiredh, θ, w)
-xh, objh, reth, timh = solve_inverse_kinematics(d, r, α, θl, θh, desiredh, xl, w)
+d, r, α, θl, θh, w, θ = params_kuka_iiwa()
+
+desiredh, desiredq = random_feasible_pose_hq(d, r, α, θl, θh)
+
+θi, obji = local_inverse_kinematics(d, r, α, θl, θh, desiredh, θ, w)
+
+#xh, objh, reth, timh = solve_inverse_kinematics(d, r, α, θl, θh, desiredh, θi, w; lift_method=lift_matrix)
+xq, objq, retq, timq = solve_inverse_kinematics(d, r, α, θl/2, θh/2, desiredq, θi, w; lift_method=lift_matrix_q)

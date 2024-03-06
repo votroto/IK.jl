@@ -35,10 +35,6 @@ function lift_tree(d, r, α, M, c, s)
     lifted
 end
 
-
-
-"""Creates the lifted pose constraint by allowing for cancellations and pre-
-computing lifting variables in a tree-like pattern."""
 function lift_tree_q(d, r, α, M, c, s)
     ids = eachindex(d)
     @polyvar C[ids] S[ids]

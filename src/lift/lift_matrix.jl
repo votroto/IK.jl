@@ -11,8 +11,8 @@ end
 
 """Creates the lifted pose constraint by multiplying matrices and adding lifting 
 variables as needed."""
-function lift_matrixq(d, r, α, M, c, s)
-    F, R = build_pose_constraintq(d, r, α, c, s)
+function lift_matrix_q(d, r, α, M, c, s)
+    F, R = build_pose_constraint_q(d, r, α, c, s)
 
     LHS = prod(F)
     RHS = prod(R)

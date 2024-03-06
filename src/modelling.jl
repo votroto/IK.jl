@@ -50,3 +50,22 @@ function build_pose_constraint_poly(d, r, α, c, s, M)
 
 	chain_poly_clean
 end
+
+
+function build_pose_constraint_q(d, r, α, c, s)
+    T(i) = dq_lin(c[i], s[i], d[i], α[i], r[i])
+    iT(i) = dq_lin_inv(c[i], s[i], d[i], α[i], r[i])
+
+    fwd, rev = _split_manipulator(eachindex(d))
+
+    map(T, fwd), map(iT, rev)
+end
+
+function build_pose_constraint_poly_q(d, r, α, c, s, M)
+	fwd, rev = build_pose_constraint_q(d, r, α, c, s)
+	
+    chain_poly_dirty = prod(fwd) - M * prod(rev)
+    chain_poly_clean = mapcoefficients.(round_zero, vec(chain_poly_dirty))
+
+	chain_poly_clean
+end
