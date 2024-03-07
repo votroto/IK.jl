@@ -34,8 +34,8 @@ function _split_manipulator(ids)
 end
 
 function build_pose_constraint(d, r, α, c, s)
-    T(i) = dh_lin_t(c[i], s[i], d[i], α[i], r[i])
-    iT(i) = dh_lin_inv_t(c[i], s[i], d[i], α[i], r[i])
+    T(i) = dh_matrix(c[i], s[i], d[i], α[i], r[i])
+    iT(i) = dh_matrix_inverse(c[i], s[i], d[i], α[i], r[i])
 
     fwd, rev = _split_manipulator(eachindex(d))
 
@@ -53,8 +53,8 @@ end
 
 
 function build_pose_constraint_q(d, r, α, c, s)
-    T(i) = dq_lin(c[i], s[i], d[i], α[i], r[i])
-    iT(i) = dq_lin_inv(c[i], s[i], d[i], α[i], r[i])
+    T(i) = dh_quaternion(c[i], s[i], d[i], α[i], r[i])
+    iT(i) = dh_quaternion_inverse(c[i], s[i], d[i], α[i], r[i])
 
     fwd, rev = _split_manipulator(eachindex(d))
 

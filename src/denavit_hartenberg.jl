@@ -1,37 +1,62 @@
+function _dh_RTz(cα, sα, cx, sx, r, d)
+    R = [
+        cx -cα*sx sα*sx
+        sx cα*cx -sα*cx
+        0 sα cα
+    ]
+    T = [r * cx, r * sx, d]
+    z = zeros(1, 3)
 
-function dh_lin_inv_t(c, s, d, α, r)
-    z = [
-        c s 0 0
-        -s c 0 0
-        0 0 1 -d
-        0 0 0 1
-    ]
-    x = [
-        1 0 0 -r
-        0 cos(α) sin(α) 0
-        0 -sin(α) cos(α) 0
-        0 0 0 1
-    ]
-    x * z
+    R, T, z
 end
 
-function dh_lin_t(c, s, d, α, r)
-    z = [
-        c -s 0 0
-        s c 0 0
-        0 0 1 d
-        0 0 0 1
+function dh_matrix(c, s, d, α, r)
+    R, T, z = _dh_RTz(cos(α), sin(α), c, s, r, d)
+
+    DH = [
+        R T
+        z 1
     ]
-    x = [
-        1 0 0 r
-        0 cos(α) -sin(α) 0
-        0 sin(α) cos(α) 0
-        0 0 0 1
-    ]
-    z * x
 end
 
-function _dq_lin(c, s, d, α, r)
+function dh_matrix_inverse(c, s, d, α, r)
+    R, T, z = _dh_RTz(cos(α), sin(α), c, s, r, d)
+
+    DH = [
+        R' -R'T
+        z 1
+    ]
+end
+
+dh_matrix(x, d, α, r) = dh_matrix(cos(x), sin(x), d, α, r)
+dh_matrix_inverse(x, d, α, r) = dh_matrix_inverse(cos(x), sin(x), d, α, r)
+
+function dh_matrix_rat(c, s, d, α, r; tol=1e-4)
+    t = rationalize(tan(α/2); tol)
+    cα, sα = (1 - t^2) / (1 + t^2), (2t) / (1 + t^2)
+    R, T, z = _dh_RTz(cα, sα, c, s, r, d)
+
+    DH = [
+        R T
+        z 1
+    ]
+end
+
+function dh_matrix_rat_inverse(c, s, d, α, r; tol=1e-3)
+    t = rationalize(tan(α/2); tol)
+    cα, sα = (1 - t^2) / (1 + t^2), (2t) / (1 + t^2)
+    R, T, z = _dh_RTz(cα, sα, c, s, r, d)
+
+    DH = [
+        R' -R'T
+        z 1
+    ]
+end
+
+dh_matrix_rat(x, d, α, r) = dh_matrix_rat(cos(x), sin(x), d, α, r)
+dh_matrix_rat_inverse(x, d, α, r) = dh_matrix_rat_inverse(cos(x), sin(x), d, α, r)
+
+function dh_quaternion(c, s, d, α, r)
     S = Quaternion(0, SA[0, 0, d])
     Z = Quaternion(c, SA[0, 0, s])
     A = Quaternion(0, SA[r, 0, 0])
@@ -40,14 +65,9 @@ function _dq_lin(c, s, d, α, r)
     ZZ = DualQuaternion(Z, S * Z / 2)
     XX = DualQuaternion(X, A * X / 2)
 
-    ZZ*XX
+    ZZ * XX
 end
 
-dq_lin(c, s, d, α, r) = _dq_lin(c, s, d, α, r)
-dq_lin_inv(c, s, d, α, r) = _dq_lin(c, s, d, α, r)'
-
-dq(x, d, α, r) = dq_lin(cos(x/2), sin(x/2), d, α, r)
-dq_inv(x, d, α, r) = dq_lin_inv(cos(x/2), sin(x/2), d, α, r)
-
-dh_t(x, d, α, r) = dh_lin_t(cos(x), sin(x), d, α, r)
-dh_inv_t(x, d, α, r) = dh_lin_inv_t(cos(x), sin(x), d, α, r)
+dh_quaternion(x, d, α, r) = dh_quaternion(cos(x / 2), sin(x / 2), d, α, r)
+dh_quaternion_inverse(c, s, d, α, r) = dh_quaternion(c, s, d, α, r)'
+dh_quaternion_inverse(x, d, α, r) = dh_quaternion_inverse(cos(x / 2), sin(x / 2), d, α, r)

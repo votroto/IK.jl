@@ -1,17 +1,17 @@
 using LinearAlgebra
 
 function solve_forward_kinematics(x, d, r, α)
-    prod(dh_t.(x, d, α, r))
+    prod(dh_matrix.(x, d, α, r))
 end
 
 function random_feasible_pose(d, r, α, θl, θh)
     x = θl .+ rand(length(θl)) .* (θh .- θl)
-    prod(dh_t.(x, d, α, r))
+    prod(dh_matrix.(x, d, α, r))
 end
 
 function random_feasible_pose_hq(d, r, α, θl, θh)
     x = θl .+ rand(length(θl)) .* (θh .- θl)
-    prod(dh_t.(x, d, α, r)), prod(dq.(x, d, α, r))
+    prod(dh_matrix.(x, d, α, r)), prod(dh_quaternion.(x, d, α, r))
 end
 
 function pose_error(A, B)
