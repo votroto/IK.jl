@@ -34,8 +34,8 @@ function _split_manipulator(ids)
 end
 
 function build_pose_constraint(d, r, α, c, s)
-    T(i) = dh_matrix(c[i], s[i], d[i], α[i], r[i])
-    iT(i) = dh_matrix_inverse(c[i], s[i], d[i], α[i], r[i])
+    T(i) = dh_matrix_rat(c[i], s[i], d[i], α[i], r[i])
+    iT(i) = dh_matrix_rat_inverse(c[i], s[i], d[i], α[i], r[i])
 
     fwd, rev = _split_manipulator(eachindex(d))
 

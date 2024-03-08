@@ -16,12 +16,16 @@ include("../src/inverse_kinematics.jl")
 include("../src/local_kinematics.jl")
 
 include("../src/quaternion.jl")
+include("../src/trutman.jl")
 
-d, r, α, θl, θh, w, θ = params_kuka_iiwa()
+using Groebner
+using DynamicPolynomials
 
-desiredh, desiredq = random_feasible_pose_hq(d, r, α, θl, θh)
+d, r, α, θl, θh, w, θ = params_random_orth(6)
+Mflt, _ = random_feasible_pose_hq(d, r, α, θl, θh)
+M = rationalize_transformation(Mflt)
 
-θi, obji = local_inverse_kinematics(d, r, α, θl, θh, desiredh, θ, w)
+@polyvar c[1:7] s[1:7]
+F, R = build_pose_constraint(d, r, α, c, s)
+constrs = view(prod(F) - M * prod(R), 1:3, :)
 
-xh, objh, reth, timh = solve_inverse_kinematics(d, r, α, θl, θh, desiredh, θ, w; lift_method=lift_matrix)
-#xq, objq, retq, timq = solve_inverse_kinematics(d, r, α, θl/2, θh/2, desiredq, θ, w; lift_method=lift_matrix_q)

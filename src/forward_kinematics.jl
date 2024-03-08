@@ -11,7 +11,8 @@ end
 
 function random_feasible_pose_hq(d, r, α, θl, θh)
     x = θl .+ rand(length(θl)) .* (θh .- θl)
-    prod(dh_matrix.(x, d, α, r)), prod(dh_quaternion.(x, d, α, r))
+    
+    prod(dh_matrix_rat.(x, d, α, r)), prod(dh_quaternion.(x, d, α, r))
 end
 
 function pose_error(A, B)

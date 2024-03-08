@@ -6,7 +6,7 @@ function lift_matrix(d, r, α, M, c, s)
     LHS = prod(F)
     RHS = prod(R)
 
-    view(LHS - M * RHS, 1:3, :)
+    @show view(LHS - M * RHS, 1:3, :)
 end
 
 """Creates the lifted pose constraint by multiplying matrices and adding lifting 
