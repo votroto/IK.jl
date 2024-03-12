@@ -765,7 +765,7 @@ version = "1.10.0"
 
 [[deps.PolyJuMP]]
 deps = ["DataStructures", "DynamicPolynomials", "IntervalArithmetic", "JuMP", "LinearAlgebra", "MathOptInterface", "MultivariateBases", "MultivariateMoments", "MultivariatePolynomials", "MutableArithmetics", "SemialgebraicSets"]
-git-tree-sha1 = "cd098c4541f63aff1fc2d4496cb58a6eef0c44eb"
+path = "/home/votroto/.julia/dev/PolyJuMP"
 uuid = "ddf597a6-d67e-5340-b84c-e37d84115374"
 version = "0.7.2"
 

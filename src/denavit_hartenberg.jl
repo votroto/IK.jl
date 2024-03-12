@@ -31,7 +31,7 @@ end
 dh_matrix(x, d, α, r) = dh_matrix(cos(x), sin(x), d, α, r)
 dh_matrix_inverse(x, d, α, r) = dh_matrix_inverse(cos(x), sin(x), d, α, r)
 
-function dh_matrix_rat(c, s, d, α, r; tol=1e-2)
+function dh_matrix_rat(c, s, d, α, r; tol=1e-3)
     t = rationalize(tan(α/2); tol)
     cα, sα = (1 - t^2) // (1 + t^2), (2t) // (1 + t^2)
 
@@ -42,7 +42,7 @@ function dh_matrix_rat(c, s, d, α, r; tol=1e-2)
     ]
 end
 
-function dh_matrix_rat_inverse(c, s, d, α, r; tol=1e-2)
+function dh_matrix_rat_inverse(c, s, d, α, r; tol=1e-3)
     t = rationalize(tan(α/2); tol)
     cα, sα = (1 - t^2) // (1 + t^2), (2t) // (1 + t^2)
     
@@ -54,7 +54,7 @@ function dh_matrix_rat_inverse(c, s, d, α, r; tol=1e-2)
 end
 
 
-function dh_matrix_rat_rat(x, d, α, r; tol=1e-2)
+function dh_matrix_rat_rat(x, d, α, r; tol=1e-3)
     t = rationalize(BigInt, tan(α/2); tol)
     cα, sα = (1 - t^2) // (1 + t^2), (2t) // (1 + t^2)
     tx = rationalize(BigInt, tan(x/2); tol)

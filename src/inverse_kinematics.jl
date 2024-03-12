@@ -31,8 +31,8 @@ end
 Computes the global inverse kinematics solution using a chosen lift_method, 
 starting from `init`.
 """
-function solve_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
-    lift_method=lift_matrix, optimizer=_default_optimizer(), init=θ)
+function solve_inverse_kinematics(d, r, α, θl, θh, M, θ, w; 
+    optimizer=_default_optimizer(), init=θ)
 
     ids = eachindex(d)
     m = Model(() -> PolyJuMP.QCQP.Optimizer(Gurobi.Optimizer()))
@@ -41,13 +41,13 @@ function solve_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
     @variable(m, s[ids])
     constrain_trig_vars.(c, s, θl, θh, init)
 
-    @constraint m lift_method(d, r, α, M, c, s) .== 0
+    @constraint m lift(d, r, α, M, c, s) .== 0
     @constraint m c .^ 2 .+ s .^ 2 .== 1
     @constraint m lin_angdiff_proxy.(c, s, θl) .>= 0
     @constraint m lin_angdiff_proxy.(c, s, θh) .<= 0
 
-    @objective m Min sum(w .* lin_abs_angdiff_proxy.(c, s, θ))
+    @objective m Min sum(lin_abs_angdiff_proxy.(c, s, θ, w))
     optimize!(m)
 
-    _extract_solution(c, s, m)
+    #_extract_solution(c, s, m)
 end

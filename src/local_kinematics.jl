@@ -4,14 +4,14 @@ using Ipopt
 using NLPModelsIpopt
 
 function _build_objective(x, w, θ)
-    return sum(w .* lin_abs_angdiff_proxy.(cos.(x), sin.(x), θ))
+    return sum(lin_abs_angdiff_proxy.(cos.(x), sin.(x), θ, w))
 end
 
 function _build_constraint(x, d, r, α, M)
     Fs, Rs = build_pose_constraint(d, r, α, cos.(x), sin.(x))
-    E = prod(Fs) - M * prod(Rs)
+    E = vec(prod(Fs) - M * prod(Rs))
 
-    return [x; norm(E)]
+    return [x; E]
 end
 
 """
@@ -22,26 +22,10 @@ Computes a local inverse kinematics solution, starting from `init`.
 function local_inverse_kinematics(d, r, α, θl, θh, M, θ, w; init=θ)
     obj(x) = _build_objective(x, w, θ)
     con(x) = _build_constraint(x, d, r, α, M)
+    z = vec(zero(M))
 
-    nlp = ADNLPModel(obj, init, con, [θl; 0], [θh; 0])
-    stats = ipopt(nlp; tol=1e-3, print_level=5, max_iter=200)
-
-    stats.solution, stats.objective
-end
-
-function build_constr_q(x, d, r, α, M)
-    Fs, Rs = build_pose_constraint_q(d, r, α, cos.(x/2), sin.(x/2))
-    E = prod(Fs) - M * prod(Rs)
-
-    return [x; norm(vec(E))]
-end
-
-function local_inverse_kinematics_q(d, r, α, θl, θh, M, θ, w; init=θ)
-    obj(x) = build_obj(x, w, θ)
-    con(x) = build_constr_q(x, d, r, α, M)
-
-    nlp = ADNLPModel(obj, init, con, [θl; 0], [θh; 0])
-    stats = ipopt(nlp; tol=1e-3, print_level=5, max_iter=200)
+    nlp = ADNLPModel(obj, init, con, [θl; z], [θh; z])
+    stats = ipopt(nlp; tol=1e-3, print_level=0, max_iter=200)
 
     stats.solution, stats.objective
 end

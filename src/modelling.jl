@@ -6,9 +6,9 @@ function lift_poly(lift_vars, poly)
     map_monomials(e -> lift_vars[e], poly)
 end
 
-"""Linear proxy expression for minimizing abs(angdiff(x, y))"""
-function lin_abs_angdiff_proxy(cosx, sinx, y)
-    2 * (1 - cosx * cos(y) - sinx * sin(y))
+"""Linear proxy expression for minimizing abs(angdiff(x, y)) * w"""
+function lin_abs_angdiff_proxy(cosx, sinx, y, w)
+    2w * (1 - cosx * cos(y) - sinx * sin(y)) 
 end
 
 """Linear proxy for angdiff(x, y)"""
@@ -22,8 +22,11 @@ end
 
 """Sets the box constraints and the initial guess for cos(x) and sin(x)"""
 function constrain_trig_vars(c, s, θl, θh, init)
-    _set_vat_lb_ub_st(c, cos_min_max(θl, θh)..., cos(init))
-    _set_vat_lb_ub_st(s, sin_min_max(θl, θh)..., sin(init))
+    #_set_vat_lb_ub_st(c, cos_min_max(θl, θh)..., cos(init))
+    #_set_vat_lb_ub_st(s, sin_min_max(θl, θh)..., sin(init))
+
+    _set_vat_lb_ub_st(c, -1, 1, cos(init/2))
+    _set_vat_lb_ub_st(s, -1, 1, sin(init/2))
 end
 
 function _split_manipulator(ids)
