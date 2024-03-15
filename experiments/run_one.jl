@@ -20,7 +20,8 @@ include("../src/local_kinematics.jl")
 d, r, α, θl, θh, w, θ = params_kuka_iiwa()
 
 desiredh, desiredq = random_feasible_pose_hq(d, r, α, θl, θh)
+
 θi, obji = local_inverse_kinematics(d, r, α, θl, θh, desiredh, θ, w)
 
 solve_inverse_kinematics(d, r, α, θl, θh, desiredh, θi, w)
-solve_inverse_kinematics(d, r, α, θl/2, θh/2, desiredq, θi, w)
+#solve_inverse_kinematics(d, r, α, θl/2, θh/2, desiredq, θi, w)

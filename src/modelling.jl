@@ -8,7 +8,7 @@ end
 
 """Linear proxy expression for minimizing abs(angdiff(x, y)) * w"""
 function lin_abs_angdiff_proxy(cosx, sinx, y, w)
-    2w * (1 - cosx * cos(y) - sinx * sin(y)) 
+    2w * (1 - cosx * cos(y) - sinx * sin(y))
 end
 
 """Linear proxy for angdiff(x, y)"""
@@ -22,11 +22,8 @@ end
 
 """Sets the box constraints and the initial guess for cos(x) and sin(x)"""
 function constrain_trig_vars(c, s, θl, θh, init)
-    #_set_vat_lb_ub_st(c, cos_min_max(θl, θh)..., cos(init))
-    #_set_vat_lb_ub_st(s, sin_min_max(θl, θh)..., sin(init))
-
-    _set_vat_lb_ub_st(c, -1, 1, cos(init/2))
-    _set_vat_lb_ub_st(s, -1, 1, sin(init/2))
+    _set_vat_lb_ub_st(c, cos_min_max(θl, θh)..., cos(init))
+    _set_vat_lb_ub_st(s, sin_min_max(θl, θh)..., sin(init))
 end
 
 function _split_manipulator(ids)
@@ -37,38 +34,19 @@ function _split_manipulator(ids)
 end
 
 function build_pose_constraint(d, r, α, c, s)
-    T(i) = dh_matrix_rat(c[i], s[i], d[i], α[i], r[i])
-    iT(i) = dh_matrix_rat_inverse(c[i], s[i], d[i], α[i], r[i])
+    T(i) = dh_matrix(c[i], s[i], d[i], α[i], r[i])
+    iT(i) = dh_matrix_inverse(c[i], s[i], d[i], α[i], r[i])
 
     fwd, rev = _split_manipulator(eachindex(d))
 
     map(T, fwd), map(iT, rev)
 end
 
-function build_pose_constraint_poly(d, r, α, c, s, M)
-	fwd, rev = build_pose_constraint(d, r, α, c, s)
-	
-    chain_poly_dirty = prod(fwd) - M * prod(rev)
-    chain_poly_clean = mapcoefficients.(round_zero, chain_poly_dirty)
-
-	chain_poly_clean
-end
-
-
-function build_pose_constraint_q(d, r, α, c, s)
+function build_pose_constraint_quaternion(d, r, α, c, s)
     T(i) = dh_quaternion(c[i], s[i], d[i], α[i], r[i])
     iT(i) = dh_quaternion_inverse(c[i], s[i], d[i], α[i], r[i])
 
     fwd, rev = _split_manipulator(eachindex(d))
 
     map(T, fwd), map(iT, rev)
-end
-
-function build_pose_constraint_poly_q(d, r, α, c, s, M)
-	fwd, rev = build_pose_constraint_q(d, r, α, c, s)
-	
-    chain_poly_dirty = prod(fwd) - M * prod(rev)
-    chain_poly_clean = mapcoefficients.(round_zero, vec(chain_poly_dirty))
-
-	chain_poly_clean
 end

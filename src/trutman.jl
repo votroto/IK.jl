@@ -6,15 +6,15 @@ end
 
 function _quaternion_to_rotation(u::Quaternion)
     R = [
-        u.q0^2 + u.q_[1]^2 - u.q_[2]^2 - u.q_[3]^2  2 * (u.q_[1] * u.q_[2] - u.q0 * u.q_[3])    2 * (u.q_[1] * u.q_[3] + u.q0 * u.q_[2])
-        2 * (u.q_[1] * u.q_[2] + u.q0 * u.q_[3])    u.q0^2 - u.q_[1]^2 + u.q_[2]^2 - u.q_[3]^2  2 * (u.q_[2] * u.q_[3] - u.q0 * u.q_[1])
-        2 * (u.q_[1] * u.q_[3] - u.q0 * u.q_[2])    2 * (u.q_[2] * u.q_[3] + u.q0 * u.q_[1])    u.q0^2 - u.q_[1]^2 - u.q_[2]^2 + u.q_[3]^2  
+        u.q0^2+u.q_[1]^2-u.q_[2]^2-u.q_[3]^2 2*(u.q_[1]*u.q_[2]-u.q0*u.q_[3]) 2*(u.q_[1]*u.q_[3]+u.q0*u.q_[2])
+        2*(u.q_[1]*u.q_[2]+u.q0*u.q_[3]) u.q0^2-u.q_[1]^2+u.q_[2]^2-u.q_[3]^2 2*(u.q_[2]*u.q_[3]-u.q0*u.q_[1])
+        2*(u.q_[1]*u.q_[3]-u.q0*u.q_[2]) 2*(u.q_[2]*u.q_[3]+u.q0*u.q_[1]) u.q0^2-u.q_[1]^2-u.q_[2]^2+u.q_[3]^2
     ]
     R / (u.q0^2 + u.q_[1]^2 + u.q_[2]^2 + u.q_[3]^2)
 end
 
 function rationalize_quaternion(q::Quaternion; tol=1e-3)
-    q0  = rationalize(BigInt, q.q0; tol)
+    q0 = rationalize(BigInt, q.q0; tol)
     q_1 = rationalize(BigInt, q.q_[1]; tol)
     q_2 = rationalize(BigInt, q.q_[2]; tol)
     q_3 = rationalize(BigInt, q.q_[3]; tol)

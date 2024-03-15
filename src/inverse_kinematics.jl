@@ -3,13 +3,12 @@ using JuMP
 using Gurobi
 
 function _default_optimizer()
-    optimizer_with_attributes(
-        Gurobi.Optimizer,
-        #MOI.Silent() => true,
-        "Nonconvex" => 2,
-        "Presolve" => 2,
-        "Threads" => 4
-    )
+    grb = Gurobi.Optimizer()
+    #MOI.set(grb, MOI.Silent(), true)
+    #MOI.set(grb, MOI.RawOptimizerAttribute("Nonconvex"), 2)
+    #MOI.set(grb, MOI.RawOptimizerAttribute("Presolve"), 2)
+    #MOI.set(grb, MOI.RawOptimizerAttribute("Threads"), 4)
+    () -> PolyJuMP.QCQP.Optimizer(grb)
 end
 
 function _extract_solution(c, s, m)
@@ -35,7 +34,7 @@ function solve_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
     optimizer=_default_optimizer(), init=θ)
 
     ids = eachindex(d)
-    m = Model(() -> PolyJuMP.QCQP.Optimizer(Gurobi.Optimizer()))
+    m = Model(optimizer)
 
     @variable(m, c[ids])
     @variable(m, s[ids])
