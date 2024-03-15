@@ -19,6 +19,14 @@ include("../src/local_kinematics.jl")
 #d, r, α, θl, θh, w, θ = params_random_6rad(7)
 d, r, α, θl, θh, w, θ = params_kuka_iiwa()
 
+
+function random_feasible_pose_hq(d, r, α, θl, θh)
+    x = θl .+ rand(length(θl)) .* (θh .- θl)
+    
+    prod(dh_matrix.(x, d, α, r)), prod(dh_quaternion.(x, d, α, r))
+end
+
+
 desiredh, desiredq = random_feasible_pose_hq(d, r, α, θl, θh)
 
 θi, obji = local_inverse_kinematics(d, r, α, θl, θh, desiredh, θ, w)

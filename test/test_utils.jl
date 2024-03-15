@@ -1,6 +1,6 @@
 using Test
 
-using IK: cos_min_max, replicate
+using IK: cos_min_max
 
 function test_cos_min_max_symmetric()
     l = rand_between(-pi + eps(), 0)

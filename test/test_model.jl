@@ -28,7 +28,7 @@ function test_abs_angdiff_proxy_is_order_preserving()
     x = rand()
     ys = sort(rand(10); by=abs)
 
-    obj(z) = lin_abs_angdiff_proxy(cos(z), sin(z), x)
+    obj(z) = lin_abs_angdiff_proxy(cos(z), sin(z), x, 1)
     @test issorted(x .+ ys; by=obj)
 end
 

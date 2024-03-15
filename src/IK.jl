@@ -8,8 +8,10 @@ include("utils.jl")
 include("modelling.jl")
 include("denavit_hartenberg.jl")
 include("forward_kinematics.jl")
+include("quaternion.jl")
 include("lift.jl")
 include("local_kinematics.jl")
 include("inverse_kinematics.jl")
+include("trutman.jl")
 
 end

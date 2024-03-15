@@ -1,5 +1,6 @@
 using Test
 
 include("utils.jl")
-include("utils_test.jl")
-include("model_test.jl")
+include("test_utils.jl")
+include("test_model.jl")
+include("test_quaternion.jl")
