@@ -48,5 +48,5 @@ function solve_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
     @objective m Min sum(lin_abs_angdiff_proxy.(c, s, θ, w))
     optimize!(m)
 
-    #_extract_solution(c, s, m)
+    _extract_solution(c, s, m)
 end
