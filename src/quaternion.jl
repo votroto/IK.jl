@@ -8,7 +8,7 @@ struct Quaternion{T}
     q3::T
 end
 
-Quaternion(O::T, v::SVector{3, T}) where T = Quaternion(O, v[1], v[2], v[3])
+Quaternion(O::T, v::SVector{3, T}) where T = Quaternion{T}(O, v[1], v[2], v[3])
 Quaternion(O::Number, v::Number) = Quaternion(O, v, v, v)
 Quaternion(O::Number) = Quaternion(O, 0)
 
@@ -19,7 +19,11 @@ Base.one(::Type{Quaternion}) = Quaternion(1, 0, 0, 0)
 Base.:(+)(a::Quaternion, b::Quaternion) = Quaternion(a.q0 + b.q0, SA[a.q1, a.q2, a.q3] + SA[b.q1, b.q2, b.q3])
 Base.:(-)(a::Quaternion, b::Quaternion) = Quaternion(a.q0 - b.q0, SA[a.q1, a.q2, a.q3] - SA[b.q1, b.q2, b.q3])
 Base.:(*)(r::Number, a::Quaternion) = Quaternion(r * a.q0, r * SA[a.q1, a.q2, a.q3])
-Base.:(*)(a::Quaternion, b::Quaternion) = Quaternion(a.q0 * b.q0 - _dot(SA[a.q1, a.q2, a.q3], SA[b.q1, b.q2, b.q3]), a.q0 * SA[b.q1, b.q2, b.q3] + b.q0 * SA[a.q1, a.q2, a.q3] + cross(SA[a.q1, a.q2, a.q3], SA[b.q1, b.q2, b.q3]))
+function Base.:(*)(a::Quaternion, b::Quaternion)
+    q0 = a.q0 * b.q0 - _dot(SA[a.q1, a.q2, a.q3], SA[b.q1, b.q2, b.q3])
+    q_ = a.q0 * SA[b.q1, b.q2, b.q3] + b.q0 * SA[a.q1, a.q2, a.q3] + cross(SA[a.q1, a.q2, a.q3], SA[b.q1, b.q2, b.q3])
+    Quaternion{promote_type(typeof(q0), eltype(q_))}(q0, q_...)
+end
 Base.:(/)(a::Quaternion, r::Number) = 1 / r * a
 Base.adjoint(a::Quaternion) = Quaternion(a.q0, -SA[a.q1, a.q2, a.q3])
 dot(a::Quaternion, b::Quaternion) = (a'b + b'a) / 2

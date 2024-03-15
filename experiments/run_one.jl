@@ -23,5 +23,5 @@ desiredh, desiredq = random_feasible_pose_hq(d, r, α, θl, θh)
 
 θi, obji = local_inverse_kinematics(d, r, α, θl, θh, desiredh, θ, w)
 
-solve_inverse_kinematics(d, r, α, θl, θh, desiredh, θi, w)
-#solve_inverse_kinematics(d, r, α, θl/2, θh/2, desiredq, θi, w)
+xh, oh, sh, th = solve_inverse_kinematics(d, r, α, θl, θh, desiredh, θi, w)
+xq, oq, sq, tq = solve_inverse_kinematics(d, r, α, θl/2, θh/2, desiredq, θi, w)

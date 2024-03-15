@@ -38,7 +38,7 @@ function solve_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
 
     @variable(m, c[ids])
     @variable(m, s[ids])
-    constrain_trig_vars.(c, s, θl, θh, init)
+    #constrain_trig_vars.(c, s, θl, θh, init)
 
     @constraint m lift(d, r, α, M, c, s) .== 0
     @constraint m c .^ 2 .+ s .^ 2 .== 1
