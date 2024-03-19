@@ -40,6 +40,10 @@ function solve_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
     @variable(m, s[ids])
     #constrain_trig_vars.(c, s, θl, θh, init)
 
+#    @polyvar C[ids] S[ids]
+#    lele = lift(d, r, α, M, C, S)
+#    println.(round.(lele, digits=10))
+
     @constraint m lift(d, r, α, M, c, s) .== 0
     @constraint m c .^ 2 .+ s .^ 2 .== 1
     @constraint m lin_angdiff_proxy.(c, s, θl) .>= 0

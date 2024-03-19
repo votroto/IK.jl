@@ -764,10 +764,8 @@ uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 version = "1.10.0"
 
 [[deps.PolyJuMP]]
-deps = ["DataStructures", "DynamicPolynomials", "IntervalArithmetic", "JuMP", "LinearAlgebra", "MathOptInterface", "MultivariateBases", "MultivariateMoments", "MultivariatePolynomials", "MutableArithmetics", "SemialgebraicSets"]
-git-tree-sha1 = "5e2887a75b14d653743df94c541183892829ed43"
-repo-rev = "master"
-repo-url = "https://github.com/jump-dev/PolyJuMP.jl"
+deps = ["DataStructures", "DynamicPolynomials", "Gurobi", "IntervalArithmetic", "JuMP", "LinearAlgebra", "MathOptInterface", "MultivariateBases", "MultivariateMoments", "MultivariatePolynomials", "MutableArithmetics", "SemialgebraicSets", "TypedPolynomials"]
+path = "/home/votroto/.julia/dev/PolyJuMP"
 uuid = "ddf597a6-d67e-5340-b84c-e37d84115374"
 version = "0.7.2"
 
@@ -1142,6 +1140,12 @@ weakdeps = ["Random", "Test"]
 
     [deps.TranscodingStreams.extensions]
     TestExt = ["Test", "Random"]
+
+[[deps.TypedPolynomials]]
+deps = ["LinearAlgebra", "MacroTools", "MultivariatePolynomials", "MutableArithmetics", "Pkg", "Random", "Reexport"]
+git-tree-sha1 = "6b4df75cec0d89015a7babe5e2fe2517c96bd5ed"
+uuid = "afbbf031-7a57-5f58-a1b9-b774a0fad08d"
+version = "0.4.1"
 
 [[deps.UUIDs]]
 deps = ["Random", "SHA"]
