@@ -38,14 +38,34 @@ function solve_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
 
     @variable(m, c[ids])
     @variable(m, s[ids])
-    #constrain_trig_vars.(c, s, θl, θh, init)
-
-#    @polyvar C[ids] S[ids]
-#    lele = lift(d, r, α, M, C, S)
-#    println.(round.(lele, digits=10))
+    constrain_trig_vars.(c, s, θl, θh, init)
 
     @constraint m lift(d, r, α, M, c, s) .== 0
     @constraint m c .^ 2 .+ s .^ 2 .== 1
+    @constraint m lin_angdiff_proxy.(c, s, θl) .>= 0
+    @constraint m lin_angdiff_proxy.(c, s, θh) .<= 0
+
+    @objective m Min sum(lin_abs_angdiff_proxy.(c, s, θ, w))
+    optimize!(m)
+
+    _extract_solution(c, s, m)
+end
+
+function gb_inverse_kinematics(eqs, C, S, θl, θh, θ, w; init=θ)
+    optimizer = optimizer_with_attributes(
+        Gurobi.Optimizer,
+        "Presolve" => 0
+    )
+
+    ids = eachindex(θ)
+    m = Model(optimizer)
+
+    @variable(m, c[ids])
+    @variable(m, s[ids])
+    constrain_trig_vars.(c, s, θl, θh, init)
+
+    jump_eqs = [e([C; S] => [c; s]) for e in eqs]
+    @constraint m jump_eqs .== 0
     @constraint m lin_angdiff_proxy.(c, s, θl) .>= 0
     @constraint m lin_angdiff_proxy.(c, s, θh) .<= 0
 

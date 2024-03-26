@@ -25,10 +25,11 @@ function Base.:(*)(a::Quaternion, b::Quaternion)
     Quaternion{promote_type(typeof(q0), eltype(q_))}(q0, q_...)
 end
 Base.:(/)(a::Quaternion, r::Number) = 1 / r * a
-Base.adjoint(a::Quaternion) = Quaternion(a.q0, -SA[a.q1, a.q2, a.q3])
-dot(a::Quaternion, b::Quaternion) = (a'b + b'a) / 2
+Base.:(/)(a::Quaternion, r::Integer) = 1 // r * a
+Base.adjoint(a::Quaternion) = Quaternion(a.q0, -a.q1, -a.q2, -a.q3)
+dot(a::Quaternion, b::Quaternion) = ((a'b + b'a) / 2).q0
 cross(a::Quaternion, b::Quaternion) = (a * b - b'a') / 2
-norm(a::Quaternion) = sqrt(dot(a, a))
+norm(a::Quaternion) = sqrt(_dot(a, a))
 Base.vec(a::Quaternion) = [a.q0, a.q1, a.q2, a.q3]
 
 struct DualQuaternion
@@ -44,7 +45,7 @@ Base.:(*)(a::DualQuaternion, b::DualQuaternion) = DualQuaternion(a.r * b.r, a.d 
 Base.adjoint(a::DualQuaternion) = DualQuaternion(a.r', a.d')
 dot(a::DualQuaternion, b::DualQuaternion) = (a'b + b'a) / 2
 cross(a::DualQuaternion, b::DualQuaternion) = (a * b - b'a') / 2
-circ(a::DualQuaternion, b::DualQuaternion) = DualQuaternion(dot(a.r, b.r) + dot(a.d, b.d), zero(Quaternion))
+circ(a::DualQuaternion, b::DualQuaternion) = dot(a.r, b.r) + dot(a.d, b.d)
 swap(a::DualQuaternion) = DualQuaternion(a.d, a.r)
 norm(a::DualQuaternion) = sqrt(circ(a, a))
 Base.vec(a::DualQuaternion) = [vec(a.r); vec(a.d)]
