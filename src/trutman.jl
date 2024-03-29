@@ -1,7 +1,7 @@
 function _rotation_to_quaternion(r::Matrix)
     f = (2 * sqrt(tr(r) + 1))
     q = [tr(r) + 1, r[3, 2] - r[2, 3], r[1, 3] - r[3, 1], r[2, 1] - r[1, 2]] / f
-    normalize!(q)
+    q = normalize(q)
     Quaternion(q[1], q[2:4]...)
 end
 

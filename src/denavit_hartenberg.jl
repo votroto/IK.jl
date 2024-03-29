@@ -20,7 +20,7 @@ function _dh_RT_rat(c, s, d, α, r; tol=1e-3, T=BigInt)
 end
 
 _dh_matrix(R, T) = [R T; 0 0 0 1]
-_dh_matrix_inverse(R, T) = [R' -R'T; 0 0 0 1]
+_dh_matrix_inverse(R, T) = [permutedims(R) -permutedims(R)T; 0 0 0 1]
 
 function dh_matrix(c, s, d, α, r)
     R, T = _dh_RT(cos(α), sin(α), c, s, r, d)
