@@ -4,11 +4,14 @@ using Gurobi
 
 function _default_optimizer()
     grb = Gurobi.Optimizer()
-    #MOI.set(grb, MOI.Silent(), true)
-    #MOI.set(grb, MOI.RawOptimizerAttribute("Nonconvex"), 2)
-    #MOI.set(grb, MOI.RawOptimizerAttribute("Presolve"), 2)
-    #MOI.set(grb, MOI.RawOptimizerAttribute("Threads"), 4)
+    MOI.set(grb, MOI.RawOptimizerAttribute("Threads"), 1)
     () -> PolyJuMP.QCQP.Optimizer(grb)
+end
+
+function _gb_optimizer()
+    optimizer_with_attributes(Gurobi.Optimizer,
+        "Threads" => 1
+    )
 end
 
 function _extract_solution(c, s, m)
