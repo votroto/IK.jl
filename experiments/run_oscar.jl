@@ -42,7 +42,7 @@ function simple_mainp(joint_count)
     d, r, α, θl, θh, w, θ
 end
 
-d, r, α, θl, θh, w, θ = simple_mainp(7)
+d, r, α, θl, θh, w, θ = params_kuka_iiwa() #simple_mainp(7)
 M = rationalize_transformation(random_feasible_pose(d, r, α, θl, θh))
 
 QQ, (C1, C2, C3, C4, C5, C6, C7, S1, S2, S3, S4, S5, S6, S7) = Oscar.polynomial_ring(Oscar.QQ, ["C1", "C2", "C3", "C4", "C5", "C6", "C7", "S1", "S2", "S3", "S4", "S5", "S6", "S7"])

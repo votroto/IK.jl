@@ -14,13 +14,16 @@ function _gb_optimizer()
     )
 end
 
-function _extract_solution(c, s, m)
+recover_angle(::AbstractArray, s, c) = atan(s, c)
+recover_angle(::DualQuaternion, s, c) = atan(s, c) * 2
+
+function _extract_solution(M, c, s, m)
     stat = termination_status(m)
 
     vs = has_values(m) ? clamp.(value.(s), -1, 1) : fill(NaN, length(c))
     vc = has_values(m) ? clamp.(value.(c), -1, 1) : fill(NaN, length(c))
 
-    sol = atan.(vs, vc)
+    sol = recover_angle.(Ref(M), vs, vc)
     obj = stat == OPTIMAL ? objective_value(m) : NaN
 
     sol, obj, stat, solve_time(m)
@@ -51,7 +54,7 @@ function solve_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
     @objective m Min sum(lin_abs_angdiff_proxy.(c, s, θ, w))
     optimize!(m)
 
-    _extract_solution(c, s, m)
+    _extract_solution(M, c, s, m)
 end
 
 function gb_inverse_kinematics(eqs, C, S, θl, θh, θ, w; init=θ)

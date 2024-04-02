@@ -15,7 +15,7 @@ include("../src/lift.jl")
 include("../src/inverse_kinematics.jl")
 include("../src/local_kinematics.jl")
 
-d, r, α, θl, θh, w, θ = params_icub_v2(8)
+d, r, α, θl, θh, w, θ = params_kuka_iiwa() # params_icub_v2(10)
 
 function _random_feasible_pose_hq(d, r, α, θl, θh)
     x = θl .+ rand(length(θl)) .* (θh .- θl)
@@ -24,5 +24,7 @@ function _random_feasible_pose_hq(d, r, α, θl, θh)
 end
 
 H, Q = _random_feasible_pose_hq(d, r, α, θl, θh)
-xh, oh, sh, th = solve_inverse_kinematics(d, r, α, θl, θh, H, θ, w)
-xh, oh, sh, th = solve_inverse_kinematics(d, r, α, θl/2, θh/2, Q, θ/2, w)
+sol, obj = local_inverse_kinematics(d, r, α, θl, θh, H, θ, w)
+
+xh, oh, sh, th = solve_inverse_kinematics(d, r, α, θl, θh, H, θ, w; init=sol)
+xq, oq, sq, tq = solve_inverse_kinematics(d, r, α, θl/2, θh/2, Q, θ/2, w; init=xh)
