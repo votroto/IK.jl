@@ -27,7 +27,7 @@ function constrain_trig_vars(c, s, θl, θh, init)
 end
 
 function _split_manipulator(ids)
-    mid = div(length(ids), 2)
+    mid = div(length(ids), 2, RoundUp)
     f, s = take(ids, mid), drop(ids, mid)
 
     f, reverse(collect(s))

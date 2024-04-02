@@ -21,7 +21,7 @@ Base.:(-)(a::Quaternion, b::Quaternion) = Quaternion(a.q0 - b.q0, SA[a.q1, a.q2,
 Base.:(*)(r::Number, a::Quaternion) = Quaternion(r * a.q0, r * SA[a.q1, a.q2, a.q3])
 function Base.:(*)(a::Quaternion, b::Quaternion)
     q0 = a.q0 * b.q0 - _dot(SA[a.q1, a.q2, a.q3], SA[b.q1, b.q2, b.q3])
-    q_ = a.q0 * SA[b.q1, b.q2, b.q3] + b.q0 * SA[a.q1, a.q2, a.q3] + cross(SA[a.q1, a.q2, a.q3], SA[b.q1, b.q2, b.q3])
+    q_ = a.q0 .* SA[b.q1, b.q2, b.q3] + b.q0 .* SA[a.q1, a.q2, a.q3] + cross(SA[a.q1, a.q2, a.q3], SA[b.q1, b.q2, b.q3])
     Quaternion{promote_type(typeof(q0), eltype(q_))}(q0, q_...)
 end
 Base.:(/)(a::Quaternion, r::Number) = 1 / r * a
