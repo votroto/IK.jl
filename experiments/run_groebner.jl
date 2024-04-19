@@ -24,42 +24,14 @@ function rat_feas_pose(d, r, α, θl, θh; tol=1e-2)
     prod(dh_matrix_rat.(x, d, α, r; tol))
 end
 
-
-
 function rat_pose_constraint_half(M, d, r, α, c, s; tol=1e-2)
     T(i) = dh_matrix_rat(c[i], s[i], d[i], α[i], r[i]; tol)
     iT(i) = dh_matrix_rat_inverse(c[i], s[i], d[i], α[i], r[i]; tol)
 
     fwd, rev = _split_manipulator(eachindex(d))
 
-    res = prod(T, fwd) - prod(iT, rev)*R
+    res = prod(T, fwd) - M*prod(iT, rev)
     view(res, 1:3, :)[:]
-end
-
-function rat_pose_constraint_full(M, d, r, α, c, s; tol=1e-2)
-    T(i) = dh_matrix_rat(c[i], s[i], d[i], α[i], r[i]; tol)
-    iT(i) = dh_matrix_rat_inverse(c[i], s[i], d[i], α[i], r[i]; tol)
-
-    res = prod(T, eachindex(d))-M
-    view(res, 1:3, :)[:]
-end
-
-function rat_feas_pose_quaternion(d, r, α, θl, θh; tol=1e-2)
-    x = θl .+ rand(length(θl)) .* (θh .- θl)
-
-    prod(dh_quaternion_rat.(x, d, α, r; tol))
-end
-
-
-function trutman_pose_constraint_quaternion(M, d, r, α, c, s; tol=1e-2)
-    T(i) = dh_quaternion_rat(c[i], s[i], d[i], α[i], r[i]; tol)
-    iT(i) = dh_quaternion_rat_inverse(c[i], s[i], d[i], α[i], r[i]; tol)
-
-    res = T(3)*T(4)*T(5)-iT(2)*iT(1)*M*iT(7)*iT(6)
-#    res = prod(T, eachindex(d))-M
-
-    vec(res)
-    
 end
 
 function simple_mainp(joint_count)
@@ -76,23 +48,41 @@ function simple_mainp(joint_count)
     d, r, α, θl, θh, w, θ
 end
 
-d, r, α, θl, θh, w, θ = params_kuka_iiwa() # simple_mainp(8)
-M = rationalize_transformation(random_feasible_pose(d, r, α, θl, θh))
-
-#M = rat_feas_pose(d, r, α, θl, θh; tol=1e-2)
+d, r, α, θl, θh, w, θ = simple_mainp(7) # params_icub_v2(8)
+M = rationalize_transformation(random_feasible_pose(d, r, α, θl, θh); tol=1e-3)
 
 @polyvar c[eachindex(d)] s[eachindex(d)]
-#constrs = trutman_pose_constraint(M, d, r, α, c, s; tol=1e-2)
-constrs = rat_pose_constraint_full(M, d, r, α, c, s; tol=1e-2)
+constrs = rat_pose_constraint_half(M, d, r, α, c, s; tol=1e-2)
 @show constrs = [vec(constrs); c .^ 2 .+ s .^ 2 .- 1]
 
+open("con.ms", "w") do f
+    allvars = [c;s]
+    for (i,v) in enumerate(allvars)
+        print(f, v)
+        if i != length(allvars)
+            print(f, ",")
+        end
+    end
+    println(f)
+    println(f, 0)
+    for (i,c) in enumerate(constrs)
+        print(f, c)
+        if i != length(constrs)
+            println(f, ",")
+        else
+            println(f)
+        end
+    end
+end
+
+#=
 gbA = groebner(constrs)
 gb12 = filter(x->maxdegree(x) <= 2, gbA)
 
 gbB = groebner(gb12)
 
 allb = [gb12[: .!= i] for i in 1:45]
-
+=#
 #=
 filename_date = Dates.format(now(), "yyyy-mm-dd_HH-MM-SS")
 
