@@ -4,6 +4,7 @@ using Ipopt
 using NLPModelsIpopt
 
 function build_obj(x, w, θ)
+    #return sum(w .* abs.(mod2pi.(x .- θ .+ 7*pi) .- pi) / (pi))
     return sum(w .* lin_abs_angdiff_proxy.(cos.(x), sin.(x), θ))
 end
 

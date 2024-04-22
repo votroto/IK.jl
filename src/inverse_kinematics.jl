@@ -4,7 +4,9 @@ using Gurobi
 function _default_optimizer()
     optimizer_with_attributes(
         Gurobi.Optimizer,
-        MOI.Silent() => true,
+        #MOI.Silent() => true,
+        "SolutionLimit" => 1,
+        "FuncNonlinear" => 1,
         "Nonconvex" => 2,
         "Presolve" => 2,
         "Threads" => 4
@@ -50,3 +52,40 @@ function solve_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
 
     _extract_solution(c, s, m)
 end
+
+column(x::VariableRef) = Gurobi.c_column(backend(owner_model(x)), index(x))
+
+function gb_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
+    lift_method=lift_matrix, init=θ)
+
+    optimizer = _default_optimizer()
+
+    ids = eachindex(θ)
+    m = direct_model(optimizer)
+
+    xstrt = init
+    ystrt = abs.(mod2pi.(init .- θ .+ 7*pi) .- pi) 
+    cstrt = cos.(init)
+    sstrt = sin.(init)
+    @variable(m, θl[i] <= x[i in ids] <= θh[i], start = xstrt[i])
+    @variable(m, 0 <= y[i in ids] <= pi, start = ystrt[i])
+    @variable(m, -1 <= c[i in ids] <= 1, start = cstrt[i])
+    @variable(m, -1 <= s[i in ids] <= 1, start = sstrt[i])
+    
+    constrain_trig_vars.(c, s, θl, θh, init)
+
+    for i in ids
+        GRBaddgenconstrCos(backend(m), C_NULL, column(x[i]), column(c[i]), C_NULL)
+        GRBaddgenconstrSin(backend(m), C_NULL, column(x[i]), column(s[i]), C_NULL)
+        
+        GRBaddgenconstrPWL(backend(m), C_NULL, column(x[i]), column(y[i]), 5, collect(θ[i]-2pi:pi:θ[i]+2pi), [0.,pi,0.,pi,0.])
+    end
+    
+    @constraint m lift_method(d, r, α, M, c, s) .== 0
+    @objective m Min sum(w .* y) 
+    
+    optimize!(m)
+
+    _extract_solution(c, s, m)    
+end
+

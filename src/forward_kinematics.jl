@@ -5,7 +5,7 @@ function solve_forward_kinematics(x, d, r, α)
 end
 
 function random_feasible_pose(d, r, α, θl, θh)
-    x = θl .+ rand(length(θl)) .* (θh .- θl)
+    x = θl .+ rand(length(d)) .* (θh .- θl)
     prod(dh_t.(x, d, α, r))
 end
 
