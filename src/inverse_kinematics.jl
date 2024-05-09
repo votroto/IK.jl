@@ -4,7 +4,18 @@ using Gurobi
 function _default_optimizer()
     optimizer_with_attributes(
         Gurobi.Optimizer,
-        #MOI.Silent() => true,
+        MOI.Silent() => true,
+        "FuncNonlinear" => 1,
+        "Nonconvex" => 2,
+        "Presolve" => 2,
+        "Threads" => 4
+    )
+end
+
+function _feasible_optimizer()
+    optimizer_with_attributes(
+        Gurobi.Optimizer,
+        MOI.Silent() => true,
         "SolutionLimit" => 1,
         "FuncNonlinear" => 1,
         "Nonconvex" => 2,
@@ -55,10 +66,8 @@ end
 
 column(x::VariableRef) = Gurobi.c_column(backend(owner_model(x)), index(x))
 
-function gb_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
-    lift_method=lift_matrix, init=θ)
-
-    optimizer = _default_optimizer()
+function angdiff_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
+    lift_method=lift_matrix, init=θ, optimizer = _default_optimizer())    
 
     ids = eachindex(θ)
     m = direct_model(optimizer)
@@ -87,5 +96,9 @@ function gb_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
     optimize!(m)
 
     _extract_solution(c, s, m)    
+end
+
+function feas_angdiff_inverse_kinematics(d, r, α, θl, θh, M, θ, w; lift_method=lift_matrix, init=θ, optimizer = _feasible_optimizer()) 
+    angdiff_inverse_kinematics(d, r, α, θl, θh, M, θ, w; lift_method, init, optimizer) 
 end
 

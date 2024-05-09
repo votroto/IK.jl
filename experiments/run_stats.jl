@@ -1,5 +1,6 @@
 include("./benchmark_ik_method.jl")
 
+include("./canadarm_parameters.jl")
 include("./kuka_parameters.jl")
 include("./rand_parameters.jl")
 include("./icub_arm_parameters.jl")
@@ -15,12 +16,13 @@ include("../src/lift/lift_matrix.jl")
 
 using Dates
 
-function parse_args(arg_pose, arg_param, arg_warm, arg_samples)
+function parse_args(arg_pose, arg_param, arg_obj, arg_samples)
     sample_count = parse(Int, arg_samples)
 
-    opts_warm = Dict(
-        "cold" => no_warm_start,
-        "warm" => local_inverse_kinematics
+    opts_obj = Dict(
+        "l2" => solve_inverse_kinematics,
+        "angdiff" => angdiff_inverse_kinematics,
+        "feas" => feas_angdiff_inverse_kinematics
     )
 
     opts_pose = Dict(
@@ -29,6 +31,7 @@ function parse_args(arg_pose, arg_param, arg_warm, arg_samples)
     )
 
     opts_param = Dict(
+        "canadarm" => params_canadarm2(),
         "kuka" => params_kuka_iiwa(),
         "rand_6rad" => params_random_6rad(7),
         "rand_4rad" => params_random_4rad(7),
@@ -41,18 +44,19 @@ function parse_args(arg_pose, arg_param, arg_warm, arg_samples)
 
     pose_gen = opts_pose[arg_pose]
     params = opts_param[arg_param]
-    warm_start = opts_warm[arg_warm]
+    obj = opts_obj[arg_obj]
 
-    return pose_gen, params, warm_start, sample_count
+    return pose_gen, params, obj, sample_count
 end
 
-function run_experiment(_pose, _params, _warm, _samples)
-    parsed = parse_args(_pose, _params, _warm, _samples)
-    pose_gen, params, warm_start, samples = parsed
+function run_experiment(_pose, _params, _obj, _samples)
+    parsed = parse_args(_pose, _params, _obj, _samples)
+    pose_gen, params, obj, samples = parsed
 
+    warm_start = local_inverse_kinematics
     filename_date = Dates.format(now(), "yyyy-mm-dd_HH-MM-SS")
-    info_line = "$(_pose)_$(_params)_$(_warm)_$(filename_date)"
-    ik_method = solve_inverse_kinematics
+    info_line = "$(_pose)_$(_params)_$(_obj)_$(filename_date)"
+    ik_method = obj
 
     println("$info_line")
     open("DATA_$info_line.txt", "w") do f
