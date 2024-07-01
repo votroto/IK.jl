@@ -40,12 +40,11 @@ function build_pose_constraint(d, r, α, c, s)
     fwd, rev = _split_manipulator(eachindex(d))
 
     map(T, fwd), map(iT, rev)
-	
 end
 
 function build_pose_constraint_poly(d, r, α, c, s, M)
 	fwd, rev = build_pose_constraint(d, r, α, c, s)
-	
+
     chain_poly_dirty = prod(fwd) - M * prod(rev)
     chain_poly_clean = mapcoefficients.(round_zero, chain_poly_dirty)
 

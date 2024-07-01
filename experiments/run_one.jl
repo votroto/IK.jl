@@ -15,22 +15,26 @@ include("../src/lift/lift_matrix.jl")
 
 using Random
 
-
-pose_gen = random_feasible_pose
-#params = params_random_4rad(7)
-params = params_icub_v2(10)
+params = params_icub_v2(7)
+params = params_kuka_iiwa()
 
 warm_start = local_inverse_kinematics
 
 d, r, α, θl, θh, w, θ = params
-desired = pose_gen(d, r, α, θl, θh)
-local_x, local_obj = warm_start(d, r, α, θl, θh, desired, θ, w)
+θ = θl .+ rand(length(d)) .* (θh .- θl)
 
-#@show xs, objs, rets, tims = solve_inverse_kinematics(d, r, α, θl, θh, desired, θ, w; init=local_x)
-@show x, obj, ret, tim = gb_inverse_kinematics(d, r, α, θl, θh, desired, θ, w; init=local_x)
-@show x2, obj2, ret2, tim2 = gb_inverse_kinematics2(d, r, α, θl, θh, desired, θ, w; init=local_x)
+desired = random_feasible_pose(d, r, α, θl, θh)
 
-#actual = solve_forward_kinematics(x, d, r, α)
-#actuals = solve_forward_kinematics(xs, d, r, α)
-#
-#loc_err, rot_err = pose_error(desired, actual)
+#@time lx, lo = zlocal_inverse_kinematics(d, r, α, θl, θh, desired, θ, w; init=θ)
+#zx, zobj, zret, ztim = zsolve_inverse_kinematics(d, r, α, θl, θh, desired, θ, w)#; init=lx)
+#ax, aobj, aret, atim = asolve_inverse_kinematics(d, r, α, θl, θh, desired, θ, w)#; init=lx)
+
+zz, = solve_inverse_kinematics(d, r, α, θl, θh, desired, θ, w; optimizer=_feasible_optimizer())
+zx, zobj, zret, ztim = solve_inverse_kinematics(d, r, α, θl, θh, desired, θ, w;optimizer=_scip())
+
+
+function ferr(x,d,r,α)
+    actual = solve_forward_kinematics(x, d, r, α)
+    @show zloc_err, zrot_err = pose_error(desired, actual)
+end
+

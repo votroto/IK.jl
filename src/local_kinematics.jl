@@ -25,7 +25,39 @@ function local_inverse_kinematics(d, r, α, θl, θh, M, θ, w; init=θ)
     con(x) = build_constr(x, d, r, α, M)
 
     nlp = ADNLPModel(obj, init, con, [θl; 0], [θh; 0])
-    stats = ipopt(nlp; tol=1e-3, print_level=0, max_iter=200)
+    stats = ipopt(nlp; tol=1e-3, print_level=5, max_iter=200)
+
+    stats.solution, stats.objective
+end
+
+
+
+
+
+
+function zbuild_obj(x, d, r, α, M)
+    Fs, Rs = build_pose_constraint(d, r, α, cos.(x), sin.(x))
+    E = prod(Fs) - M * prod(Rs)
+
+    return norm(E, 2)
+end
+
+
+function zbuild_constr(x, d, r, α, M)
+    return x
+end
+
+"""
+    local_inverse_kinematics(d, r, α, θl, θh, M, θ, w; init=θ)
+
+Computes a local inverse kinematics solution, starting from `init`.
+"""
+function zlocal_inverse_kinematics(d, r, α, θl, θh, M, θ, w; init=θ)
+    obj(x) = zbuild_obj(x, d, r, α, M)
+    con(x) = zbuild_constr(x, d, r, α, M)
+
+    nlp = ADNLPModel(obj, init, con, θl, θh)
+    stats = ipopt(nlp; print_level=5, max_iter=200)
 
     stats.solution, stats.objective
 end
