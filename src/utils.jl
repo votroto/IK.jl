@@ -18,3 +18,11 @@ end
 function replicate(xs, ns)
     mapreduce(fill, vcat, xs, ns)
 end
+
+function rand_between(l, h)
+    l + rand() * (h - l)
+end
+
+function rand_between(l, h, n)
+    ntuple(_ -> rand_between(l, h), n)
+end

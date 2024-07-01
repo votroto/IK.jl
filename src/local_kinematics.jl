@@ -32,7 +32,7 @@ end
 
 
 function _build_constraintgb(x, cs, fs)
-    E = [f(cs => [cos.(x); sin.(x)]) for f in fs]
+    E = norm([f(cs => [cos.(x); sin.(x)]) for f in fs])
 
     return [x; E]
 end
@@ -45,7 +45,7 @@ Computes a local inverse kinematics solution, starting from `init`.
 function local_inverse_kinematicsgb(cs, fs, θl, θh, θ, w; init=θ)
     obj(x) = _build_objective(x, w, θ)
     con(x) = _build_constraintgb(x, cs, fs)
-    z = fill(0., length(fs))
+    z = 0.
 
     nlp = ADNLPModel(obj, init, con, Float64[θl; -z], Float64[θh; z])
     stats = ipopt(nlp; tol=1e-3, max_iter=200)

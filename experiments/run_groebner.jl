@@ -37,7 +37,7 @@ end
 function simple_mainp(joint_count)
     r = rand(1:99, joint_count)
     d = rand(1:99, joint_count)
-    α = rand([-π / 2, 0, π / 2], joint_count)
+    α = rand_between(-π / 2, π / 2, joint_count)
 
     θl = vec(fill(-3, joint_count))
     θh = vec(fill(+3, joint_count))
@@ -48,29 +48,31 @@ function simple_mainp(joint_count)
     d, r, α, θl, θh, w, θ
 end
 
+for i in 1:100
 d, r, α, θl, θh, w, θ = simple_mainp(7) # params_icub_v2(8)
 M = rationalize_transformation(random_feasible_pose(d, r, α, θl, θh); tol=1e-3)
 
 @polyvar c[eachindex(d)] s[eachindex(d)]
 constrs = rat_pose_constraint_half(M, d, r, α, c, s; tol=1e-2)
-@show constrs = [vec(constrs); c .^ 2 .+ s .^ 2 .- 1]
+constrs = [vec(constrs); c .^ 2 .+ s .^ 2 .- 1]
 
-open("con.ms", "w") do f
-    allvars = [c;s]
-    for (i,v) in enumerate(allvars)
-        print(f, v)
-        if i != length(allvars)
-            print(f, ",")
+    open("simple/con$i.ms", "w") do f
+        allvars = [c;s]
+        for (i,v) in enumerate(allvars)
+            print(f, v)
+            if i != length(allvars)
+                print(f, ",")
+            end
         end
-    end
-    println(f)
-    println(f, 0)
-    for (i,c) in enumerate(constrs)
-        print(f, c)
-        if i != length(constrs)
-            println(f, ",")
-        else
-            println(f)
+        println(f)
+        println(f, 0)
+        for (i,c) in enumerate(constrs)
+            print(f, c)
+            if i != length(constrs)
+                println(f, ",")
+            else
+                println(f)
+            end
         end
     end
 end

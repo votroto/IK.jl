@@ -1,5 +1,6 @@
 using PolyJuMP
 using JuMP
+using SCIP
 using Gurobi
 
 
@@ -18,9 +19,13 @@ end
 
 
 function _gb_optimizer()
-    optimizer_with_attributes(Gurobi.Optimizer,
-        "Threads" => 1
+    optimizer_with_attributes(SCIP.Optimizer,
+        "parallel/maxnthreads" => 4,
+        "limits/time" => 100
     )
+    #optimizer_with_attributes(Gurobi.Optimizer,
+    #    "Threads" => 4,
+    #)
 end
 
 recover_angle(::AbstractArray, s, c) = atan(s, c)
@@ -122,9 +127,9 @@ end
 
 
 function gb_inverse_kinematics_an(eqs, C, S, θl, θh, θ, w; init=θ)
-    optimizer=_default_optimizer()
+    optimizer=_gb_optimizer()
 
-    ids = eachindex(d)
+    ids = eachindex(C)
     m = Model(optimizer)
 
     @variable(m, c[ids])
@@ -140,7 +145,6 @@ function gb_inverse_kinematics_an(eqs, C, S, θl, θh, θ, w; init=θ)
     optimize!(m)
 
     _extract_solution([], c, s, m)
-    
 end
 
 
