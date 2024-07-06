@@ -1,6 +1,12 @@
 using JuMP
 using Gurobi
 using SCIP
+using AmplNLWriter
+
+
+function _couenne()
+    () -> AmplNLWriter.Optimizer("couenne")
+end
 
 
 function _scip()

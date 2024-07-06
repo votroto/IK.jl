@@ -29,8 +29,9 @@ desired = random_feasible_pose(d, r, α, θl, θh)
 #zx, zobj, zret, ztim = zsolve_inverse_kinematics(d, r, α, θl, θh, desired, θ, w)#; init=lx)
 #ax, aobj, aret, atim = asolve_inverse_kinematics(d, r, α, θl, θh, desired, θ, w)#; init=lx)
 
-zz, = solve_inverse_kinematics(d, r, α, θl, θh, desired, θ, w; optimizer=_feasible_optimizer())
-zx, zobj, zret, ztim = solve_inverse_kinematics(d, r, α, θl, θh, desired, θ, w;optimizer=_scip())
+#zz, = solve_inverse_kinematics(d, r, α, θl, θh, desired, θ, w; optimizer=_feasible_optimizer())
+zx, zobj, zret, ztim = solve_inverse_kinematics(d, r, α, θl, θh, desired, θ, w;optimizer=_default_optimizer())
+cx, cobj, cret, ctim = solve_inverse_kinematics(d, r, α, θl, θh, desired, θ, w;optimizer=_couenne())
 
 
 function ferr(x,d,r,α)
