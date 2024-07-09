@@ -1,10 +1,5 @@
 using JuMP
 
-import Base.:*
-Base.:*(a::GenericQuadExpr, b::GenericQuadExpr) = jump_quadratic_product(a, b)
-Base.:*(a::GenericAffExpr, b::GenericQuadExpr) = jump_quadratic_product(a, b)
-Base.:*(a::GenericQuadExpr, b::GenericAffExpr) = jump_quadratic_product(a, b)
-
 function _start_value(x)
     v = start_value(x)
     isnothing(v) ? NaN : v
@@ -60,5 +55,5 @@ end
 
 function jump_quadratic_product(a::AbstractMatrix, b::AbstractMatrix)
     is, js = axes(a)
-    [mapreduce(*, +, a[i, :], b[:, j]) for i in is, j in js]
+    [mapreduce(jump_quadratic_product, +, a[i, :], b[:, j]) for i in is, j in js]
 end
