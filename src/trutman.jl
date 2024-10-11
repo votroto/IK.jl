@@ -15,6 +15,11 @@ function _quaternion_to_rotation(u::Quaternion)
     R / (q0^2 + q1^2 + q2^2 + q3^2)
 end
 
+function _dual_quaternion_to_translation(q::DualQuaternion)
+    t = ( 2 * q.d ) * (q.r')
+    [t.q1, t.q2, t.q3]
+end
+
 function rationalize_quaternion(q::Quaternion; tol=1e-3)
     q0 = rationalize(BigInt, q.q0; tol)
     q_1 = rationalize(BigInt, q.q1; tol)
