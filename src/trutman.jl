@@ -15,8 +15,13 @@ function _quaternion_to_rotation(u::Quaternion)
     R / (q0^2 + q1^2 + q2^2 + q3^2)
 end
 
+<<<<<<< HEAD
 function _quaternion_to_translation(q::DualQuaternion)
     t = 2.0 * q.d * Q.r'
+=======
+function _dual_quaternion_to_translation(q::DualQuaternion)
+    t = ( 2 * q.d ) * (q.r')
+>>>>>>> 2be260c6dcd975c62e05a764f862797e9a437f0e
     [t.q1, t.q2, t.q3]
 end
 

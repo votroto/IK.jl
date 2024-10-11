@@ -15,6 +15,7 @@ include("../src/lift.jl")
 include("../src/inverse_kinematics.jl")
 include("../src/local_kinematics.jl")
 
+<<<<<<< HEAD
 using HomotopyContinuation, LinearAlgebra
 
 function fpose(d, r, α, θl, θh)
@@ -26,13 +27,49 @@ end
 
 
 function fapose(d, r, α, θl, θh)
+=======
+using DynamicPolynomials
+
+function con_mat(M, d, r, α, c, s; tol=1e-2)
+    T(i) = dh_matrix_rat(c[i], s[i], d[i], α[i], r[i]; tol)
+    iT(i) = dh_matrix_rat_inverse(c[i], s[i], d[i], α[i], r[i]; tol)
+
+    res = T(3)*T(4)*T(5)-iT(2)*iT(1)*M*iT(7)*iT(6)
+    #res = prod(T, eachindex(d))-M
+
+    res
+end
+
+function rat_feas_poses(d, r, α, θl, θh)
+>>>>>>> 2be260c6dcd975c62e05a764f862797e9a437f0e
     x = θl .+ rand(length(θl)) .* (θh .- θl)
     Q = prod(dh_quaternion.(x, d, α, r))
     M = prod(dh_matrix.(x, d, α, r))
 
+<<<<<<< HEAD
     M,Q
 end
 
+=======
+    M = prod(dh_matrix.(x, d, α, r))
+    Q = prod(dh_quaternion.(x, d, α, r))
+
+    M, Q
+end
+
+function con_quat(M, d, r, α, c, s; tol=1e-2)
+    T(i) = dh_quaternion_rat(c[i], s[i], d[i], α[i], r[i]; tol)
+    iT(i) = dh_quaternion_rat_inverse(c[i], s[i], d[i], α[i], r[i]; tol)
+
+    res = T(3)*T(4)*T(5)-iT(2)*iT(1)*M*iT(7)*iT(6)
+#    res = prod(T, eachindex(d))-M
+
+    res
+
+end
+
+
+>>>>>>> 2be260c6dcd975c62e05a764f862797e9a437f0e
 function simple_mainp(joint_count)
     r = rand(1:99, joint_count)
     d = rand(1:99, joint_count)
@@ -48,6 +85,7 @@ function simple_mainp(joint_count)
 end
 
 d, r, α, θl, θh, w, θ = simple_mainp(7)
+<<<<<<< HEAD
 M, Q = feas_pose(d, r, α, θl, θh)
 
 function pose_constraint(M, d, r, α, c, s)
@@ -84,3 +122,6 @@ sys = System(constrs; variables=[c; s], parameters=vec(M))
 @show rwarm = solve(sys, [[cx; sx]]; start_parameters=vec(Mx), target_parameters=vec(My))
 
 nothing
+=======
+M, Q = rat_feas_poses(d, r, α, θl, θh)
+>>>>>>> 2be260c6dcd975c62e05a764f862797e9a437f0e
