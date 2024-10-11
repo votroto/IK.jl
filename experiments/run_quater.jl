@@ -15,67 +15,23 @@ include("../src/lift.jl")
 include("../src/inverse_kinematics.jl")
 include("../src/local_kinematics.jl")
 
-using Groebner
-using DynamicPolynomials
+using HomotopyContinuation, LinearAlgebra
 
-function rat_feas_pose(d, r, α, θl, θh; tol=1e-2)
+function fpose(d, r, α, θl, θh)
     x = θl .+ rand(length(θl)) .* (θh .- θl)
+    Q = prod(dh_quaternion.(x, d, α, r))
 
-    prod(dh_matrix_rat.(x, d, α, r; tol))
+    x, Q, [vec(Q.r); _quaternion_to_translation(Q)] 
 end
 
-function trutman_pose_constraint(M, d, r, α, c, s; tol=1e-2)
-    T(i) = dh_matrix_rat(c[i], s[i], d[i], α[i], r[i]; tol)
-    iT(i) = dh_matrix_rat_inverse(c[i], s[i], d[i], α[i], r[i]; tol)
 
-    #res = T(3)*T(4)*T(5)-iT(2)*iT(1)*M*iT(7)*iT(6)
-    res = prod(T, eachindex(d))-M
-    view(res, 1:3, :)[:]
-end
-
-function rat_feas_pose_quaternion(d, r, α, θl, θh; tol=1e-2)
+function fapose(d, r, α, θl, θh)
     x = θl .+ rand(length(θl)) .* (θh .- θl)
+    Q = prod(dh_quaternion.(x, d, α, r))
+    M = prod(dh_matrix.(x, d, α, r))
 
-    prod(dh_quaternion_rat.(x, d, α, r; tol))
+    M,Q
 end
-
-function trutman_pose_constraint_quaternion(M, d, r, α, c, s; tol=1e-2)
-    T(i) = dh_quaternion_rat(c[i], s[i], d[i], α[i], r[i]; tol)
-    iT(i) = dh_quaternion_rat_inverse(c[i], s[i], d[i], α[i], r[i]; tol)
-
-    res = T(3)*T(4)*T(5)-iT(2)*iT(1)*M*iT(7)*iT(6)
-#    res = prod(T, eachindex(d))-M
-
-    vec(res)
-    
-end
-
-#r = [0; 0; 0; 0; 0; 0; 0]
-#d = [340; 0; 400; 0; 400; 0; 126]
-#α = [-π / 2, π / 2, -π / 2, π / 2, -π / 2, π / 2, 0]
-#θl = [-2.9671; -2.0944; -2.9671; -2.0944; -2.9671; -2.0944; -3.0543]
-#θh = [2.9671; 2.0944; 2.9671; 2.0944; 2.9671; 2.0944; 3.0543]
-
-
-
-#=
-r = [47,22,82,19,85,15,89]
-d = [74,26,11,86,81,16,35]
-α = [-0.5073481922772854, 2.498091544796509, 0.8097835725701669, 2.651635327336065, 2.498091544796509, -2.882187579277969, 0.2213144423477913]
-
-M = [
-    41//105	 -88//105	8//21	-11807//100
-    8//21	  11//21	16//21	389//100
-    -88//105 -16//105	11//21	-24931//100
-    0 0 0 1
-]
-=#
-#
-#M = Rational{BigInt}[19569//43481 25200//43481 29540//43481 -4792//17; 33600//43481 -27569//43481 1260//43481 14030//29; 19460//43481 22260//43481 -31881//43481 9110//33; 0 0 0 1]
-#M = rat_feas_pose_quaternion(d, r, α, θl, θh; tol=1e-2)
-
-
-
 
 function simple_mainp(joint_count)
     r = rand(1:99, joint_count)
@@ -91,22 +47,40 @@ function simple_mainp(joint_count)
     d, r, α, θl, θh, w, θ
 end
 
-
 d, r, α, θl, θh, w, θ = simple_mainp(7)
-M = rat_feas_pose_quaternion(d, r, α, θl, θh) # rationalize_transformation(random_feasible_pose(d, r, α, θl, θh))
+M, Q = feas_pose(d, r, α, θl, θh)
 
-#M = rat_feas_pose(d, r, α, θl, θh; tol=1e-2)
+function pose_constraint(M, d, r, α, c, s)
+    fwd, rev = build_pose_constraint_quaternion(d, r, α, c, s)
+    Mm = DualQuaternion(Quaternion(M[1], M[2], M[3], M[4]), Quaternion(M[5], M[6], M[7], M[8]))
+    Q = prod(fwd) - Mm * prod(rev)
 
-@polyvar c[eachindex(d)] s[eachindex(d)]
-constrs = trutman_pose_constraint(M, d, r, α, c, s; tol=1e-2)
-constrs = [constrs; c .^ 2 .+ s .^ 2 .- 1]
+    #T(i) = dh_quaternion(c[i], s[i], d[i], α[i], r[i])
+    #Q = prod(T, eachindex(d))     
+    vec(Q) 
+end
 
-gbA = groebner(constrs)
-gb12 = filter(x->maxdegree(x) <= 2, gbA)
 
-lx, lo = local_inverse_kinematics(d, r, α, θl, θh, M, θ, w; init=θ)
-gb_inverse_kinematics(gb12, c, s, θl, θh, θ, w; init=lx)
+@var c[1:7] s[1:7] M[1:8]
+d, r, α, θl, θh, w, θ = simple_mainp(7)
 
-#then find the degree two polys
-#compare to the original by recomputing GB and assert equal
-#try with quats
+y, My, my = fpose(d, r, α, θl, θh)
+cy = cos.(y / 2)
+sy = sin.(y / 2)
+
+x, Mx, mx = fpose(d, r, α, θl, θh)
+cx = cos.(x / 2)
+sx = sin.(x / 2)
+
+constrs = pose_constraint(M, d, r, α, c, s)
+constrs = [vec(constrs); c .^ 2 .+ s .^ 2 .- 1]
+sys = System(constrs; variables=[c; s], parameters=vec(M))
+
+@show norm([constr(c=>cx, s=>sx, vec(M)=>vec(Mx)) for constr in constrs])
+@show norm([constr(c=>cy, s=>sy, vec(M)=>vec(My)) for constr in constrs])
+
+#@show rcold = solve(sys; target_parameters=vec(Mx))
+#@show rself = solve(sys, solutions(rcold); start_parameters=vec(Mx), target_parameters=vec(My))
+@show rwarm = solve(sys, [[cx; sx]]; start_parameters=vec(Mx), target_parameters=vec(My))
+
+nothing

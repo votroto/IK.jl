@@ -20,7 +20,7 @@ include("../src/local_kinematics.jl")
 @polyvar c[1:7] s[1:7]
 
 function zzz(i)
-    file_path = "simple/con$i.out"
+    file_path = "../ikdata/simple/con$i.out"
     file_content = open(file_path, "r") do file
         read(file, String)
     end
@@ -31,7 +31,7 @@ function zzz(i)
     @show file_path
     
     local_x, local_obj = local_inverse_kinematicsgb([c;s], divided, fill(-3.0, 7), fill(3.0,7), zeros(7), ones(7)/7)
-    x, obj, ret, tim = gb_inverse_kinematics_an(divided, c, s, fill(-3.0, 7), fill(3.0,7), zeros(7), ones(7)/7, init=local_x)
+    x, obj, ret, tim = gb_inverse_kinematics(divided, c, s, fill(-3.0, 7), fill(3.0,7), zeros(7), ones(7)/7, init=local_x)
     
     @show local_x
     @show x
@@ -45,11 +45,13 @@ end
 
 info_line = "SCIP2"
 println("$info_line")
-open("/tmp/DATA_$info_line.txt", "w") do f
+#open("/tmp/DATA_$info_line.txt", "w") do f
+f = stdout
     println(f, "# $info_line")
     println(f, "# loc_err rot_err obj local_obj tim ret")
-    for i in 1:100
+    for i in 1:1
         result = zzz(i)
         println(f, join(result, " "))
+        
     end
-end
+#end

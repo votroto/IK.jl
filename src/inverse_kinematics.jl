@@ -76,15 +76,126 @@ function solve_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
     constrain_trig_vars.(c, s, θl, θh, init)
 
     @constraint m lift(d, r, α, M, c, s) .== 0
-    @constraint m c .^ 2 .+ s .^ 2 .== 1
+   # @constraint m c .^ 2 .+ s .^ 2 .== 1
     @constraint m lin_angdiff_proxy.(c, s, θl) .>= 0
     @constraint m lin_angdiff_proxy.(c, s, θh) .<= 0
 
-    #@objective m Min sum(lin_abs_angdiff_proxy.(c, s, θ, w))
+    @objective m Min sum(lin_abs_angdiff_proxy.(c, s, θ, w))
     optimize!(m)
 
     _extract_solution(M, c, s, m)
 end
+
+
+
+function cossin_inverse_kinematics(d, r, α, θl, θh, M, θ, w; init=θ)
+    optimizer = optimizer_with_attributes(
+        Gurobi.Optimizer,
+        "FuncNonlinear" => 1
+    )
+
+    ids = eachindex(θ)
+    m = direct_model(optimizer)
+
+    @variable(m, θl[i] <= x[i in ids] <= θh[i], start=init[i])
+    @variable(m, -1 <= c[ids] <= 1)
+    @variable(m, -1 <= s[ids] <= 1)
+    #constrain_trig_vars.(c, s, θl, θh, init)
+
+    @constraint m lift(d, r, α, M, c, s) .== 0
+
+    for i in ids
+        GRBaddgenconstrCos(backend(m), C_NULL, column(x[i]), column(c[i]), C_NULL)
+        GRBaddgenconstrSin(backend(m), C_NULL, column(x[i]), column(s[i]), C_NULL)
+    end
+
+    #@constraint m c .^ 2 .+ s .^ 2 .== 1
+    #@constraint m lin_angdiff_proxy.(c, s, θl) .>= 0
+    #@constraint m lin_angdiff_proxy.(c, s, θh) .<= 0
+
+    @objective m Min sum(lin_abs_angdiff_proxy.(c, s, θ, w))
+    optimize!(m)
+
+    _extract_solution(M, c, s, m)
+end
+
+
+"""Performs a tree-like fold over a magma `f`"""
+function _reduce(f, xs; init=1)
+    n = length(xs)
+
+    if n == 0
+        init
+    elseif n == 1
+        first(xs)
+    else
+        mid = div(length(xs), 2)
+        h, t = take(xs, mid), drop(xs, mid)
+        f(_reduce(f, h; init), _reduce(f, t; init))
+    end
+end
+function lift_matrix(d, r, α, M, c, s)
+    F, R = build_pose_constraint(d, r, α, c, s)
+
+    LHS = _reduce(jump_quadratic_product, F)
+    RHS = _reduce(jump_quadratic_product, R)
+
+    view(LHS - M * RHS, 1:3, :)
+end
+
+function bsolve_inverse_kinematics(d, r, α, θl, θh, M, θ, w;
+    lift_method=lift_matrix, optimizer=_default_optimizer(), init=θ)
+    optimizer = optimizer_with_attributes(
+        Gurobi.Optimizer,
+        "FuncNonlinear" => 1
+    )
+
+    ids = eachindex(θ)
+    m = direct_model(optimizer)
+
+
+
+
+
+
+    @variable(m, c[ids])
+    @variable(m, s[ids])
+    constrain_trig_vars.(c, s, θl, θh, init)
+
+    @constraint m c .^ 2 .+ s .^ 2 .== 1
+    @constraint m lin_angdiff_proxy.(c, s, θl) .>= 0
+    @constraint m lin_angdiff_proxy.(c, s, θh) .<= 0
+
+
+
+    #=cstrt = cos.(init)
+    sstrt = sin.(init)
+    @variable(m, θl[i] <= x[i in ids] <= θh[i], start = init[i])
+
+    @variable(m, -1 <= c[i in ids] <= 1, start = cstrt[i])
+    @variable(m, -1 <= s[i in ids] <= 1, start = sstrt[i])
+
+    
+    for i in ids
+        GRBaddgenconstrCos(backend(m), C_NULL, column(x[i]), column(c[i]), C_NULL)
+        GRBaddgenconstrSin(backend(m), C_NULL, column(x[i]), column(s[i]), C_NULL)
+    end
+    =#
+
+    @variable(m, Z )
+    @variable(m, W[1:3,1:4])
+    @constraint m lift_method(d, r, α, M, c, s) .== W    
+    GRBaddgenconstrNorm(backend(m), C_NULL, column(Z), 12, [column(W[i]) for i in eachindex(W)], 1.0)
+    @objective m Min Z
+    
+    @constraint m lift_method(d, r, α, M, c, s) .== 0
+    #@objective m Min sum(lin_abs_angdiff_proxy.(c, s, θ, w))
+    optimize!(m)
+
+    _extract_solution(M,c,s, m)
+end
+
+
 
 function gb_inverse_kinematics(eqs, C, S, θl, θh, θ, w; init=θ)
     optimizer = optimizer_with_attributes(
