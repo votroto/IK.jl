@@ -13,7 +13,7 @@ function _default_optimizer()
     global GRB_ENV_REF
     optimizer_with_attributes(
         () -> Gurobi.Optimizer(GRB_ENV_REF[]),
-        #MOI.Silent() => true,
+        MOI.Silent() => true,
         "BestObjStop" => 0.0,
         "FuncNonlinear" => 1,
         "Nonconvex" => 2,
