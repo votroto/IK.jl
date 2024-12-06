@@ -29,35 +29,12 @@ VS = []
 VAAA = Dict()
 
 function _q_mono_lift(a, b)
-    global MM, LBS, UBS, VS, VAAA
 
     model = a.model
-
-if MM != model
-    MM = model
-    LBS = []
-    UBS = []
-    VS = []
-    VAAA = Dict()
-
-end
-
-
 
     lb, ub = _q_prod_bounds(a, b)
     start = _q_prod_start(a, b)
     name = "($a$b)"
-
-if (a,b) in keys(VAAA)
-    @show "yes"
-    return VAAA[(a,b)]
-end
-
-
-LBS = [LBS; lb]
-UBS = [UBS; lb]
-VS = [VS; (a,b)]
-
 
     var = @variable(model,
         lower_bound = lb,
@@ -66,7 +43,6 @@ VS = [VS; (a,b)]
         base_name = name
     )
 
-    VAAA[(a,b)] = var
 
     @constraint(model, var == a * b)
 

@@ -25,7 +25,7 @@ function local_inverse_kinematics(d, r, α, θl, θh, M, θ, w; init=θ)
     con(x) = build_constr(x, d, r, α, M)
 
     nlp = ADNLPModel(obj, init, con, [θl; 0], [θh; 0])
-    stats = ipopt(nlp; tol=1e-3, print_level=5, max_iter=200)
+    stats = ipopt(nlp; tol=1e-3, print_level=1, max_iter=200)
 
     stats.solution, stats.objective
 end

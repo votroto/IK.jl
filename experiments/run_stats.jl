@@ -16,14 +16,8 @@ include("../src/lift/lift_matrix.jl")
 
 using Dates
 
-function parse_args(arg_pose, arg_param, arg_obj, arg_samples)
+function parse_args(arg_pose, arg_param, arg_samples)
     sample_count = parse(Int, arg_samples)
-
-    opts_obj = Dict(
-        "l2" => solve_inverse_kinematics,
-        "angdiff" => angdiff_inverse_kinematics,
-        "feas" => feas_angdiff_inverse_kinematics
-    )
 
     opts_pose = Dict(
         "uniform" => uniform_pose_gen,
@@ -44,19 +38,18 @@ function parse_args(arg_pose, arg_param, arg_obj, arg_samples)
 
     pose_gen = opts_pose[arg_pose]
     params = opts_param[arg_param]
-    obj = opts_obj[arg_obj]
 
-    return pose_gen, params, obj, sample_count
+    return pose_gen, params, sample_count
 end
 
-function run_experiment(_pose, _params, _obj, _samples)
-    parsed = parse_args(_pose, _params, _obj, _samples)
-    pose_gen, params, obj, samples = parsed
+function run_experiment(_pose, _params, _samples)
+    parsed = parse_args(_pose, _params, _samples)
+    pose_gen, params, samples = parsed
 
     warm_start = local_inverse_kinematics
     filename_date = Dates.format(now(), "yyyy-mm-dd_HH-MM-SS")
-    info_line = "$(_pose)_$(_params)_$(_obj)_$(filename_date)"
-    ik_method = obj
+    info_line = "$(_pose)_$(_params)_$(filename_date)"
+    ik_method = solve_inverse_kinematics
 
     println("$info_line")
     open("DATA_$info_line.txt", "w") do f
